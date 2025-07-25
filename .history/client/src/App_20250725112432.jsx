@@ -2,8 +2,7 @@ import React from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoutes';
 import Login from './components/Login';
-import Dashboard from './pages/Dashboard';
-import Unauthorized from './pages/Unauthorized';
+import Dashboard from './components/Dashboard';
 
 import './App.css';
 
@@ -12,15 +11,7 @@ function App () {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute requiredAdmin={true}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );

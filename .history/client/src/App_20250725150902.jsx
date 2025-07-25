@@ -12,15 +12,7 @@ function App () {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute requiredAdmin={true}>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </Router>
   );
