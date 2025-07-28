@@ -49,16 +49,7 @@ const Dashboard = () => {
             <ul className="space-y-2">
               {users.map (user => (
                 <li key={user.id} className="border-b pb-2 text-gray-700">
-                  <strong>{user.email}</strong>
-                  {' '}
-                  –
-                  {' '}
-                  {user.company
-                    ? user.company
-                    : <span className="italic text-gray-400">
-                        (няма фирма)
-                      </span>}
-                  {' '}
+                  <strong>{user.email}</strong> – {user.company}{' '}
                   {user.isAdmin &&
                     <span className="text-blue-500">(админ)</span>}
                 </li>
