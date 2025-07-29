@@ -14,14 +14,6 @@ function App () {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="/register"
-          element={
-            <ProtectedRoute requiredAdmin={true}>
-              <Register />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/dashboard"
           element={
             <ProtectedRoute requiredAdmin={true}>

@@ -18,7 +18,7 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <h1 className="text-2xl font-bold mb-6">Добре дошъл, администраторе!</h1>
 
       {error

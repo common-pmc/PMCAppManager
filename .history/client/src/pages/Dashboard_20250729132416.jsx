@@ -18,12 +18,12 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="bg-gray-100 p-4">
+    <div className="bg-gray-200 p-6">
       <h1 className="text-2xl font-bold mb-6">Добре дошъл, администраторе!</h1>
 
       {error
         ? <p className="text-red-500">{error}</p>
-        : <div className="p-4 rounded shadow">
+        : <div className="bg-gray-200 p-4 rounded shadow">
             <h2 className="text-xl font-semibold mb-2">Потребители</h2>
             <ul className="space-y-2">
               {users.map (user => (
