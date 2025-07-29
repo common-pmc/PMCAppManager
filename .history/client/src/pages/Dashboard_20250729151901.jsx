@@ -11,13 +11,12 @@ const Dashboard = () => {
     axiosInstance
       .get ('/users')
       .then (res => setUsers (res.data))
+      .then (res => console.log ('Users fetched:', res.data))
       .catch (err => {
         console.error ('Error:', err);
         setError ('Грешка при зареждане на потребителите');
       });
   }, []);
-
-  console.log ('Users:', users);
 
   return (
     <div className="bg-gray-100 p-4">

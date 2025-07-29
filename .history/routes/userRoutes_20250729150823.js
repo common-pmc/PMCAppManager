@@ -6,6 +6,6 @@ const isAdmin = require ('../middlewares/isAdmin');
 const router = express.Router ();
 
 router.get ('/', verifyToken, isAdmin, getAllUsers);
-router.post ('/register', verifyToken, isAdmin, createUser);
+router.post ('/', verifyToken, isAdmin, createUser);
 
 module.exports = router;

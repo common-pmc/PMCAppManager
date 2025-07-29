@@ -1,3 +1,4 @@
+import {hash} from 'bcryptjs';
 const bcrypt = require ('bcryptjs');
 const {User} = require ('../database/models');
 
@@ -17,15 +18,6 @@ const createUser = async (req, res) => {
       company,
       isAdmin,
     });
-    res.status (201).json ({
-      message: 'Потребителят е създаден успешно',
-      user: {
-        id: newUser.id,
-        email: newUser.email,
-        company: newUser.company,
-        isAdmin: newUser.isAdmin,
-      },
-    });
   } catch (error) {
     console.error ('User creation error:', error);
     res.status (500).json ({message: 'Internal Server Error'});
@@ -35,14 +27,7 @@ const createUser = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll ({
-      attributes: [
-        'id',
-        'email',
-        'company',
-        'isAdmin',
-        'createdAt',
-        'updatedAt',
-      ],
+      attributes: ['id', 'email', 'createdAt', 'updatedAt'],
     });
     res.status (200).json (users);
   } catch (error) {
