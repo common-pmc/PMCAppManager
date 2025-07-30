@@ -1,0 +1,40 @@
+const {File} = require ('../database/models');
+const jwt = require ('jsonwebtoken');
+
+const SECRET = process.env.JWT_SECRET || 'my_secret_key';
+
+exports.generateDownloadLink = (req, res) => {
+  const {fileId} = req.params;
+  const token = jwt.sign ({fileId, userId: req.user.id}, SECRET, {
+    expiresIn: '1h', // Link valid for 1 hour
+  });
+
+  const downloadLink = `${req.protocol}://${req.get ('host')}/api/files/download/${fileId}?token=${token}`;
+  res.status (200).json ({
+    message: 'Download link generated successfully',
+    downloadLink,
+  });
+};
+
+exports.uploadFile = async (req, res) => {
+  try {
+    const file = await File.create ({
+      filename: req.file.filename,
+      originalname: req.file.originalname,
+      company: req.user.company,
+      downloadedBy: '', // Initially empty, can be updated later
+    });
+    res.status (201).json ({
+      message: 'Файлът е качен успешно',
+      file: {
+        id: file.id,
+        filename: file.filename,
+        originalname: file.originalname,
+        company: file.company,
+      },
+    });
+  } catch (error) {
+    console.error ('Грешка при качване:', error);
+    res.status (500).json ({message: 'Грешка при качване на файла.'});
+  }
+};
