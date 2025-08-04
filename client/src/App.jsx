@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Unauthorized from './pages/Unauthorized';
+import UploadPage from './pages/Upload';
 
 import './App.css';
 
@@ -18,6 +19,14 @@ function App () {
           element={
             <ProtectedRoute requiredAdmin={true}>
               <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoute requiredAdmin={true}>
+              <UploadPage />
             </ProtectedRoute>
           }
         />
