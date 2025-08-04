@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 
 const UploadForm = () => {
@@ -8,6 +9,8 @@ const UploadForm = () => {
   const [message, setMessage] = useState ('');
   const [error, setError] = useState ('');
   const [uploadedFileUrl, setUploadedFileUrl] = useState ('');
+
+  const navigate = useNavigate ();
 
   const handleFileChange = e => {
     setFile (e.target.files[0]);
@@ -39,6 +42,9 @@ const UploadForm = () => {
       setFile (null);
       setFilename ('');
       setDescription ('');
+      setTimeout (() => {
+        navigate ('/dashboard'); // Redirect to dashboard after upload
+      }, 2000);
     } catch (error) {
       const msg = error.response?.data?.message || 'Възникна грешка при качването на файла.';
       setError (msg);
