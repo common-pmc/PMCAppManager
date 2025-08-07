@@ -1,0 +1,63 @@
+import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import axiosInstance from '../api/axiosInstance';
+
+const FileList = () => {
+  const [files, setFiles] = useState ([]);
+
+  const navigate = useNavigate ();
+
+  useEffect (() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await axiosInstance.get ('/files');
+        setFiles (response.data);
+      } catch (error) {
+        console.error ('Грешка при зареждане на файлове:', error);
+      }
+    };
+
+    fetchFiles ();
+  }, []);
+
+  return (
+    <div className="max-w-4xl mx-auto mt-8 bg-white p-4 rounded shadow">
+      <h2 className="text-2xl font-bold mb-4 text-center">Качени файлове</h2>
+      <button
+            className="mb-4 bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+            onClick={() => navigate ('/dashboard')}
+          >Обратно към списъка с потребители
+      </button>
+      {files.length === 0
+        ? <p className="text-center text-gray-500">Няма качени файлове.</p>
+        : <table className="w-full text-left border">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="py-2 px-4 border-b">Оригинално име</th>
+                <th className="py-2 px-4 border-b">Име на сървъра</th>
+                <th className="py-2 px-4 border-b">Фирма</th>
+                <th className='py-2 px-4 border-b'>Потребител</th>
+                <th className="py-2 px-4 border-b">Дата</th>
+              </tr>
+            </thead>
+            <tbody>
+              {files.map (file => (
+                <tr key={file.id}>
+                  <td className="py-2 px-4 border-b">{file.filename}</td>
+                  <td className="py-2 px-4 border-b">{file.serverFilename}</td>
+                  <td className="py-2 px-4 border-b">{file.owner?.company || '-'}</td>
+                  <td className='py-2 px-4 border-b'>{file.owner?.email || '-'}</td>
+                  <td className="py-2 px-4 border-b">
+                    {new Date (file.createdAt).toLocaleString ('bg-BG')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>}
+
+          
+    </div>
+  );
+};
+
+export default FileList;
