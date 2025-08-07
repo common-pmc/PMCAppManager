@@ -52,7 +52,7 @@ exports.downloadFile = async (req, res) => {
         req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress,
       userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date (),
+      timeStamp: new Date (),
     });
 
     // Update the downloadedBy field / create a record in DownloadLog

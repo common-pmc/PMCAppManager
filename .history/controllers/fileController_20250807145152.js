@@ -7,7 +7,6 @@ const {
 const jwt = require ('jsonwebtoken');
 const path = require ('path');
 const fs = require ('fs');
-const {time, timeStamp} = require ('console');
 
 const SECRET = process.env.JWT_SECRET || 'my_secret_key';
 
@@ -37,23 +36,7 @@ exports.downloadFile = async (req, res) => {
     }
 
     // Create a record in download history
-    await downloadHistory.create ({
-      userId: decoded.userId,
-      fileId: file.id,
-      downloadedAt: new Date (),
-    });
-
-    // Create a record in download log
-    await DownloadLog.create ({
-      userId: decoded.userId,
-      fileId: file.id,
-      downloadedAt: new Date (),
-      ipAddress: req.ip ||
-        req.headers['x-forwarded-for'] ||
-        req.connection.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date (),
-    });
+    await downloadHistory.create ({});
 
     // Update the downloadedBy field / create a record in DownloadLog
     await file.update ({
