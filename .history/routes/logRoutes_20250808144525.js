@@ -4,11 +4,4 @@ const {verifyToken, isAdmin} = require ('../middlewares/authToken');
 
 const router = express.Router ();
 
-router.get (
-  '/:fileId/download-details',
-  verifyToken,
-  isAdmin,
-  getFileDownloadDetails
-);
-
 module.exports = router;

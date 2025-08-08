@@ -65,9 +65,10 @@ exports.getFileDownloadDetails = async (req, res) => {
       (a, b) => new Date (b.downloadedAt) - new Date (a.downloadedAt)
     );
 
+    // You may want to send the combined result in the response
     return res.json ({combined});
   } catch (error) {
-    console.error ('Грешка при извличането на детайли:', error);
+    console.error ('Error fetching file download details:', error);
     return res.status (500).json ({message: 'Internal server error'});
   }
 };

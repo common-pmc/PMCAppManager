@@ -41,33 +41,10 @@ exports.getFileDownloadDetails = async (req, res) => {
       };
     });
 
-    logs.forEach (l => {
-      const existsInHistory = histories.some (
-        h =>
-          h.userId === l.userId &&
-          Math.abs (new Date (l.timestamp) - new Date (h.downloadedAt)) < 5000
-      );
-      if (!existsInHistory) {
-        combined.push ({
-          type: 'log',
-          id: l.id,
-          userId: l.userId,
-          userEmail: l.User.email,
-          company: l.User.company,
-          downloadedAt: l.timestamp,
-          ipAddress: l.ipAddress,
-          userAgent: l.userAgent,
-        });
-      }
-    });
-
-    combined.sort (
-      (a, b) => new Date (b.downloadedAt) - new Date (a.downloadedAt)
-    );
-
+    // You may want to send the combined result in the response
     return res.json ({combined});
   } catch (error) {
-    console.error ('Грешка при извличането на детайли:', error);
+    console.error ('Error fetching file download details:', error);
     return res.status (500).json ({message: 'Internal server error'});
   }
 };
