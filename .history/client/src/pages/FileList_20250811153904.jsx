@@ -64,12 +64,7 @@ const FileList = () => {
                     {new Date (file.createdAt).toLocaleString ('bg-BG')}
                   </td>
                   <td className="border p-2">
-                    <button 
-                      className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded" 
-                      onClick={() => handleOpenModal(file.id)}
-                    >
-                        Детайли
-                    </button>
+                    <button onClick={() => handleOpenModal(file.id)}>Детайли</button>
                   </td>
                 </tr>
               ))}

@@ -14,25 +14,16 @@ require ('dotenv').config ();
 const app = express ();
 const PORT = process.env.PORT || 5000;
 
-// Генерира автоматично .env файл във фронтенда
-const frontendEnvPath = path.join (__dirname, './client/.env');
+// Generate a .env file on the frontend
+const frontendEnvPath = path.join (__dirname, '../client/.env');
 fs.writeFileSync (
   frontendEnvPath,
   `VITE_API_BASE_URL=${process.env.API_BASE_URL}\n`
 );
-console.log (`✅ Frontend env file generated at ${frontendEnvPath}`);
-
-// Production mode: Сървърът ще обслужва билднатото React приложение
-if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join (__dirname, './client/dist');
-  app.use (express.static (buildPath));
-
-  app.get ('*', (req, res) => {
-    res.sendFile (path.join (buildPath, 'index.html'));
-  });
-}
+console.log ();
 
 if (process.env.NODE_ENV === 'production') {
+  // Сървърът ще обслужва билднатото React приложение
   app.use (express.static (path.join (__dirname, 'client', 'dist')));
 
   app.get ('*', (req, res) => {

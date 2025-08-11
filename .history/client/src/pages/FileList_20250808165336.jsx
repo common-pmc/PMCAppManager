@@ -5,8 +5,6 @@ import FileDownloadDetailsModal from '../components/FileDownloadDetailsModal';
 
 const FileList = () => {
   const [files, setFiles] = useState ([]);
-  const [selectedFileId, setSelectedFileId] = useState (null);
-  const [isModalOpen, setIsModalOpen] = useState (false);
 
   const navigate = useNavigate ();
 
@@ -23,16 +21,6 @@ const FileList = () => {
     fetchFiles ();
   }, []);
 
-  const handleOpenModal = (fileId) => {
-    setSelectedFileId (fileId);
-    setIsModalOpen (true);
-  }
-
-  const handleCloseModal = () => {
-    setIsModalOpen (false);
-    setSelectedFileId (null);
-  }
-
   return (
     <div className="max-w-4xl mx-auto mt-8 bg-white p-4 rounded shadow">
       <h2 className="text-2xl font-bold mb-4 text-center">Качени файлове</h2>
@@ -46,44 +34,29 @@ const FileList = () => {
         : <table className="w-full text-left border">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border p-2">Оригинално име</th>
-                <th className="border p-2">Име на сървъра</th>
-                <th className="border p-2">Фирма</th>
-                <th className='border p-2'>Потребител</th>
-                <th className="border p-2">Дата</th>
+                <th className="py-2 px-4 border-b">Оригинално име</th>
+                <th className="py-2 px-4 border-b">Име на сървъра</th>
+                <th className="py-2 px-4 border-b">Фирма</th>
+                <th className='py-2 px-4 border-b'>Потребител</th>
+                <th className="py-2 px-4 border-b">Дата</th>
               </tr>
             </thead>
             <tbody>
               {files.map (file => (
                 <tr key={file.id}>
-                  <td className="border p-2">{file.filename}</td>
-                  <td className="border p-2">{file.serverFilename}</td>
-                  <td className="border p-2">{file.owner?.company || '-'}</td>
-                  <td className='border p-2'>{file.owner?.email || '-'}</td>
-                  <td className="border p-2">
+                  <td className="py-2 px-4 border-b">{file.filename}</td>
+                  <td className="py-2 px-4 border-b">{file.serverFilename}</td>
+                  <td className="py-2 px-4 border-b">{file.owner?.company || '-'}</td>
+                  <td className='py-2 px-4 border-b'>{file.owner?.email || '-'}</td>
+                  <td className="py-2 px-4 border-b">
                     {new Date (file.createdAt).toLocaleString ('bg-BG')}
-                  </td>
-                  <td className="border p-2">
-                    <button 
-                      className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded" 
-                      onClick={() => handleOpenModal(file.id)}
-                    >
-                        Детайли
-                    </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>}
 
-          {
-            isModalOpen && (
-              <FileDownloadDetailsModal 
-                fileId={selectedFileId}
-                onClose={handleCloseModal}
-              />
-            )
-          }
+          
     </div>
   );
 };
