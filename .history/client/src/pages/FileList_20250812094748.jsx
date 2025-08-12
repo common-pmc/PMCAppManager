@@ -47,6 +47,7 @@ const FileList = () => {
             <thead>
               <tr className="bg-gray-100">
                 <th className="border p-2">Оригинално име</th>
+                <th className="border p-2">Име на сървъра</th>
                 <th className="border p-2">Фирма</th>
                 <th className='border p-2'>Потребител</th>
                 <th className="border p-2">Дата</th>
@@ -56,6 +57,7 @@ const FileList = () => {
               {files.map (file => (
                 <tr key={file.id}>
                   <td className="border p-2">{file.filename}</td>
+                  <td className="border p-2">{file.serverFilename}</td>
                   <td className="border p-2">{file.owner?.company || '-'}</td>
                   <td className='border p-2'>{file.owner?.email || '-'}</td>
                   <td className="border p-2">
