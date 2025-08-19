@@ -19,12 +19,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'downloadedBy',
       });
       User.belongsTo (models.Company, {
-        foreignKey: 'companyId',
+        foreignKey: companyId,
       });
-      User.belongsTo (models.Department, {
-        foreignKey: 'departmentId',
-        allowNull: true,
-      });
+      User.belongsTo (models.Department);
     }
   }
   User.init (

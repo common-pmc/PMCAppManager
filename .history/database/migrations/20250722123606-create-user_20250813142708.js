@@ -18,8 +18,8 @@ module.exports = {
       isAdmin: {
         type: Sequelize.BOOLEAN,
       },
-      companyId: {
-        type: Sequelize.INTEGER,
+      company: {
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,

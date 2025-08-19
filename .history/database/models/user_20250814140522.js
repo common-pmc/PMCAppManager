@@ -18,13 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany (models.File, {
         foreignKey: 'downloadedBy',
       });
-      User.belongsTo (models.Company, {
-        foreignKey: 'companyId',
-      });
-      User.belongsTo (models.Department, {
-        foreignKey: 'departmentId',
-        allowNull: true,
-      });
     }
   }
   User.init (

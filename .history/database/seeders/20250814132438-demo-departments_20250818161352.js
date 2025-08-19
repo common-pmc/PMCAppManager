@@ -1,5 +1,4 @@
 'use strict';
-const bcrypt = require ('bcryptjs');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -13,35 +12,25 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-    const hash = await bcrypt.hash ('admin123', 10);
-    await queryInterface.bulkInsert ('Users', [
+    queryInterface.bulkInsert ('Departments', [
       {
-        email: 'admin@example.com',
-        password: hash,
-        isAdmin: true,
+        departmentName: 'HR',
         companyId: 1,
-        departmentId: 1,
-        isActive: true,
+        userId: null,
         createdAt: new Date (),
         updatedAt: new Date (),
       },
       {
-        email: 'user1@firm-a.com',
-        password: hash,
-        isAdmin: false,
+        departmentName: 'Engineering',
+        companyId: 1,
+        userId: null,
+        createdAt: new Date (),
+        updatedAt: new Date (),
+      },
+      {
+        departmentName: 'Sales',
         companyId: 2,
-        departmentId: null,
-        isActive: true,
-        createdAt: new Date (),
-        updatedAt: new Date (),
-      },
-      {
-        email: 'user2@firm-b.com',
-        password: hash,
-        isAdmin: false,
-        companyId: 3,
-        departmentId: null,
-        isActive: true,
+        userId: null,
         createdAt: new Date (),
         updatedAt: new Date (),
       },
@@ -55,6 +44,6 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    await queryInterface.bulkDelete ('Users', null, {});
+    await queryInterface.bulkDelete ('Departments', null, {});
   },
 };

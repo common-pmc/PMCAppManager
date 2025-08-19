@@ -18,35 +18,14 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany (models.File, {
         foreignKey: 'downloadedBy',
       });
-      User.belongsTo (models.Company, {
-        foreignKey: 'companyId',
-      });
-      User.belongsTo (models.Department, {
-        foreignKey: 'departmentId',
-        allowNull: true,
-      });
     }
   }
   User.init (
     {
-      email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      isAdmin: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
-      isActive: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      isAdmin: DataTypes.BOOLEAN,
+      company: DataTypes.STRING,
     },
     {
       sequelize,

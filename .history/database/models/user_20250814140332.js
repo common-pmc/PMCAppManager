@@ -18,13 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       User.hasMany (models.File, {
         foreignKey: 'downloadedBy',
       });
-      User.belongsTo (models.Company, {
-        foreignKey: 'companyId',
-      });
-      User.belongsTo (models.Department, {
-        foreignKey: 'departmentId',
-        allowNull: true,
-      });
     }
   }
   User.init (
@@ -37,15 +30,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      isAdmin: {
-        type: DataTypes.BOOLEAN,
+      isAdmin: DataTypes.BOOLEAN,
+      company: {
+        type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: false,
-      },
-      isActive: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
       },
     },
     {
