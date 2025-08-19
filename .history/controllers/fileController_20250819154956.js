@@ -26,13 +26,6 @@ exports.downloadFile = async (req, res) => {
     const {token} = req.params;
     const decoded = jwt.verify (token, SECRET);
     const downloadingUser = await User.findByPk (decoded.userId);
-    if (!downloadingUser || !downloadingUser.isActive) {
-      return res
-        .status (403)
-        .json ({
-          message: 'Вашият акаунт е деактивиран. Нямате право да сваляте файлове.',
-        });
-    }
     const file = await File.findByPk (decoded.fileId);
     if (!file) {
       return res.status (404).json ({message: 'Файлът не е намерен.'});

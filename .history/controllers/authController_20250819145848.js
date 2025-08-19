@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
         id: user.id,
         email: user.email,
         isAdmin: user.isAdmin,
-        companyId: user.companyId,
+        company: user.company,
       },
       process.env.JWT_SECRET,
       {
@@ -41,13 +41,7 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const {
-    email,
-    password,
-    companyId,
-    isAdmin = false,
-    isActive = true,
-  } = req.body;
+  const {email, password, company, isAdmin = false} = req.body;
 
   if (!req.user || !req.user.isAdmin) {
     return res
@@ -65,9 +59,8 @@ exports.register = async (req, res) => {
     const user = await User.create ({
       email,
       password: hashedPassword,
-      companyId,
+      companyId: req.body.companyId,
       isAdmin,
-      isActive,
     });
 
     res.status (201).json ({

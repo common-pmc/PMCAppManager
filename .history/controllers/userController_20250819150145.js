@@ -39,7 +39,7 @@ const getAllUsers = async (req, res) => {
       attributes: [
         'id',
         'email',
-        'companyId',
+        'company',
         'isAdmin',
         'createdAt',
         'updatedAt',
