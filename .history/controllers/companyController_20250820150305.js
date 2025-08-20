@@ -81,17 +81,6 @@ exports.createDepartment = async (req, res) => {
     }
 
     const {departmentName, companyId} = req.body;
-    if (!departmentName || !companyId) {
-      return res
-        .status (400)
-        .json ({error: 'Името на отдела и ID на компанията са задължителни.'});
-    }
-
-    const dep = await Department.create ({
-      departmentName,
-      companyId,
-    });
-    res.status (201).json (dep);
   } catch (error) {
     res.status (500).json ({
       error: 'Грешка при създаване на отдела',

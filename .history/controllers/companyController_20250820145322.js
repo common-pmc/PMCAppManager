@@ -50,51 +50,11 @@ exports.createCompany = async (req, res) => {
     const company = await Company.create ({companyName});
 
     if (Array.isArray (departments) && departments.length > 0) {
-      const rows = departments.filter (Boolean).map (name => ({
-        departmentName: name,
-        companyId: company.id,
-      }));
-      if (rows.length > 0) {
-        await Department.bulkCreate (rows);
-      }
+      const rows = departments.filter (Boolean);
     }
-
-    const created = await Company.findByPk (company.id, {
-      include: [{model: Department, attributes: ['id', 'departmentName']}],
-    });
-    res.status (201).json (created);
   } catch (error) {
     res.status (500).json ({
       error: 'Грешка при създаване на компанията',
-      error: error.message,
-    });
-  }
-};
-
-exports.createDepartment = async (req, res) => {
-  try {
-    // Check if the user is an admin
-    if (!req.user || !req.user.isAdmin) {
-      return res.status (403).json ({
-        error: 'Достъпът е отказан. Само администратори могат да добавят отдели.',
-      });
-    }
-
-    const {departmentName, companyId} = req.body;
-    if (!departmentName || !companyId) {
-      return res
-        .status (400)
-        .json ({error: 'Името на отдела и ID на компанията са задължителни.'});
-    }
-
-    const dep = await Department.create ({
-      departmentName,
-      companyId,
-    });
-    res.status (201).json (dep);
-  } catch (error) {
-    res.status (500).json ({
-      error: 'Грешка при създаване на отдела',
       error: error.message,
     });
   }

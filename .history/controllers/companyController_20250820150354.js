@@ -91,7 +91,6 @@ exports.createDepartment = async (req, res) => {
       departmentName,
       companyId,
     });
-    res.status (201).json (dep);
   } catch (error) {
     res.status (500).json ({
       error: 'Грешка при създаване на отдела',
