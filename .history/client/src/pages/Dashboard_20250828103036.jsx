@@ -40,8 +40,7 @@ const Dashboard = () => {
                         (няма фирма)
                       </span>}
                   {user.Department && user.Department.departmentName
-                    ? `-${user.Department.departmentName}`
-                    : null}
+                    ? <>}
                   {' '}
                   {user.isAdmin &&
                     <span className="text-blue-500">(админ)</span>}

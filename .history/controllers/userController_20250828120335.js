@@ -3,14 +3,7 @@ const {User, Company, Department} = require ('../database/models');
 
 const createUser = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      companyId,
-      departmentId,
-      isAdmin,
-      isActive,
-    } = req.body;
+    const {email, password, companyId, isAdmin, isActive} = req.body;
 
     const existingUser = await User.findOne ({where: {email}});
     if (existingUser) {
@@ -36,7 +29,6 @@ const createUser = async (req, res) => {
         isAdmin: newUser.isAdmin,
       },
     });
-    console.log ('Получено departmentId:', departmentId);
   } catch (error) {
     console.error ('Грешка при създаване на потребителя.', error);
     res.status (500).json ({message: 'Internal Server Error'});

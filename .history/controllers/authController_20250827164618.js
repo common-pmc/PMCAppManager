@@ -74,6 +74,11 @@ exports.register = async (req, res) => {
       if (!department) {
         return res.status (400).json ({message: 'Отделът не е намерен!'});
       }
+      if (companyId && department.companyId !== companyId) {
+        return res.status (400).json ({
+          message: 'Отделът не принадлежи на избраната фирма!',
+        });
+      }
     }
 
     const hashedPassword = await bcrypt.hash (password, 10);
@@ -81,7 +86,6 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       companyId,
-      departmentId,
       isAdmin,
       isActive,
     });
@@ -91,14 +95,8 @@ exports.register = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        companyId: user.companyId,
-        departmentId: user.departmentId,
+        company: user.company,
         isAdmin: user.isAdmin,
-        department: departmentId
-          ? await Department.findByPk (departmentId, {
-              attributes: ['id', 'departmentName'],
-            })
-          : null,
       },
     });
   } catch (error) {

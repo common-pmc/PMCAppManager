@@ -94,11 +94,6 @@ exports.register = async (req, res) => {
         companyId: user.companyId,
         departmentId: user.departmentId,
         isAdmin: user.isAdmin,
-        department: departmentId
-          ? await Department.findByPk (departmentId, {
-              attributes: ['id', 'departmentName'],
-            })
-          : null,
       },
     });
   } catch (error) {

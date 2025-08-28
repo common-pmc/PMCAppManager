@@ -3,14 +3,7 @@ const {User, Company, Department} = require ('../database/models');
 
 const createUser = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      companyId,
-      departmentId,
-      isAdmin,
-      isActive,
-    } = req.body;
+    const {email, password, companyId, isAdmin, isActive} = req.body;
 
     const existingUser = await User.findOne ({where: {email}});
     if (existingUser) {

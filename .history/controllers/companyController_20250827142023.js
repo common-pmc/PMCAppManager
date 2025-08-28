@@ -4,12 +4,7 @@ exports.listCompanies = async (req, res) => {
   try {
     const companies = await Company.findAll ({
       attributes: ['id', 'companyName'],
-      include: [
-        {
-          model: Department,
-          attributes: ['id', 'departmentName'],
-        },
-      ],
+      include: [{model: Department, attributes: ['id', 'departmentName']}],
       order: [['companyName', 'ASC']],
     });
     res.json (companies);

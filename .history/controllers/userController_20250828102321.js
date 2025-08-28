@@ -3,14 +3,7 @@ const {User, Company, Department} = require ('../database/models');
 
 const createUser = async (req, res) => {
   try {
-    const {
-      email,
-      password,
-      companyId,
-      departmentId,
-      isAdmin,
-      isActive,
-    } = req.body;
+    const {email, password, companyId, isAdmin, isActive} = req.body;
 
     const existingUser = await User.findOne ({where: {email}});
     if (existingUser) {
@@ -22,7 +15,6 @@ const createUser = async (req, res) => {
       email,
       password: hashedPassword,
       companyId,
-      departmentId,
       isAdmin,
       isActive,
     });
@@ -32,13 +24,11 @@ const createUser = async (req, res) => {
         id: newUser.id,
         email: newUser.email,
         company: newUser.company,
-        departmentId: newUser.departmentId,
         isAdmin: newUser.isAdmin,
       },
     });
-    console.log ('Получено departmentId:', departmentId);
   } catch (error) {
-    console.error ('Грешка при създаване на потребителя.', error);
+    console.error ('User creation error:', error);
     res.status (500).json ({message: 'Internal Server Error'});
   }
 };
@@ -50,7 +40,6 @@ const getAllUsers = async (req, res) => {
         'id',
         'email',
         'companyId',
-        'departmentId',
         'isAdmin',
         'createdAt',
         'updatedAt',
@@ -71,7 +60,7 @@ const getAllUsers = async (req, res) => {
     });
     res.status (200).json (users);
   } catch (error) {
-    console.error ('Грешка при зареждане на потребителите.', error);
+    console.error ('User fetch error:', error);
     res.status (500).json ({message: 'Internal Server Error'});
   }
 };

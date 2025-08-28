@@ -47,14 +47,14 @@ const Register = () => {
       companyId: value,
       departmentId: '', // Reset department when company changes
     });
-    const selectedCompany = companies.find (
-      company => company.id === Number (value)
-    );
-    if (selectedCompany && selectedCompany.Departments) {
-      setDepartments (selectedCompany.Departments);
-    } else {
-      setDepartments ([]);
-    }
+    // const selectedCompany = companies.find (
+    //   company => company.id === Number (value)
+    // );
+    // if (selectedCompany && selectedCompany.departments) {
+    //   setDepartments (selectedCompany.departments);
+    // } else {
+    //   setDepartments ([]);
+    // }
   };
 
   const handleSubmit = async e => {
@@ -139,7 +139,7 @@ const Register = () => {
             <option value="">--Избери отдел--</option>
             {departments.map (department => (
               <option key={department.id} value={department.id}>
-                {department.departmentName}
+                {department.name}
               </option>
             ))}
           </select>}

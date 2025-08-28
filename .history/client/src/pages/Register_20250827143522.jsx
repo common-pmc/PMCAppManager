@@ -139,7 +139,7 @@ const Register = () => {
             <option value="">--Избери отдел--</option>
             {departments.map (department => (
               <option key={department.id} value={department.id}>
-                {department.departmentName}
+                {department.name}
               </option>
             ))}
           </select>}
