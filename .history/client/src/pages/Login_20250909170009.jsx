@@ -1,21 +1,7 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
-import {
-  Box,
-  Button,
-  Paper,
-  TextField,
-  Typography,
-  Alert,
-  IconButton,
-  InputAdornment,
-} from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Login as LoginIcon,
-} from '@mui/icons-material';
+import {Box, Button, Paper, TextField, Typography, Alert} from '@mui/material';
 
 const Login = () => {
   const [formData, setFormData] = useState ({
@@ -23,7 +9,6 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState ('');
-  const [showPassword, setShowPassword] = useState (false);
 
   const navigate = useNavigate ();
 
@@ -59,7 +44,7 @@ const Login = () => {
       }}
     >
       <Paper
-        elevation={10}
+        elevation={5}
         sx={{
           padding: 4,
           maxWidth: 400,
@@ -88,7 +73,6 @@ const Login = () => {
           onChange={e => setFormData ({...formData, email: e.target.value})}
           fullWidth
           margin="normal"
-          variant="standard"
           required
         />
 
@@ -99,23 +83,7 @@ const Login = () => {
           onChange={e => setFormData ({...formData, password: e.target.value})}
           fullWidth
           margin="normal"
-          variant="standard"
           required
-          slotProps={{
-            input: {
-              type: showPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword (!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
         />
 
         {error &&
@@ -128,7 +96,6 @@ const Login = () => {
           variant="contained"
           color="primary"
           fullWidth
-          endIcon={<LoginIcon />}
           sx={{mt: 3}}
         >
           Вход

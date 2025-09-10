@@ -90,12 +90,6 @@ const FileList = () => {
         >
           Към списъка с потребители
         </Button>
-        <Typography
-          variant='h4'
-          className='text-center flex-1'
-        >
-          Качени файлове
-        </Typography>
       </Stack>
 
       {files.length === 0

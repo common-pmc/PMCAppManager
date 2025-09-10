@@ -82,20 +82,8 @@ const FileList = () => {
 
   return (
     <div className="max-w-5xl mx-auto mt-8">
-      <Stack direction='row' alignItems='center' justifyContent='space-between' className='mb-4'>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate ('/dashboard')}
-        >
-          Към списъка с потребители
-        </Button>
-        <Typography
-          variant='h4'
-          className='text-center flex-1'
-        >
-          Качени файлове
-        </Typography>
+      <Stack>
+        jghfj
       </Stack>
 
       {files.length === 0

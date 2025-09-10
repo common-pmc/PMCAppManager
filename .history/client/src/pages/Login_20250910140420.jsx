@@ -128,7 +128,6 @@ const Login = () => {
           variant="contained"
           color="primary"
           fullWidth
-          endIcon={<LoginIcon />}
           sx={{mt: 3}}
         >
           Вход

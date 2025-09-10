@@ -11,11 +11,7 @@ import {
   IconButton,
   InputAdornment,
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Login as LoginIcon,
-} from '@mui/icons-material';
+import {Visibility, VisibilityOff} from '@mui/icons-material';
 
 const Login = () => {
   const [formData, setFormData] = useState ({
@@ -23,7 +19,6 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState ('');
-  const [showPassword, setShowPassword] = useState (false);
 
   const navigate = useNavigate ();
 
@@ -101,21 +96,6 @@ const Login = () => {
           margin="normal"
           variant="standard"
           required
-          slotProps={{
-            input: {
-              type: showPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword (!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
         />
 
         {error &&
@@ -128,7 +108,6 @@ const Login = () => {
           variant="contained"
           color="primary"
           fullWidth
-          endIcon={<LoginIcon />}
           sx={{mt: 3}}
         >
           Вход

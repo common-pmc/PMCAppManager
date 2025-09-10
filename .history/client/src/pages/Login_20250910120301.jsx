@@ -11,11 +11,7 @@ import {
   IconButton,
   InputAdornment,
 } from '@mui/material';
-import {
-  Visibility,
-  VisibilityOff,
-  Login as LoginIcon,
-} from '@mui/icons-material';
+import {Visibility, VisibilityOff} from '@mui/icons-material';
 
 const Login = () => {
   const [formData, setFormData] = useState ({
@@ -101,20 +97,18 @@ const Login = () => {
           margin="normal"
           variant="standard"
           required
-          slotProps={{
-            input: {
-              type: showPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword (!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowPassword (!showPassword)}
+                  edge="end"
+                >
+                  {showPassword ? <Visibility /> : <VisibilityOff />}
+                </IconButton>
+              </InputAdornment>
+            ),
+            type: showPassword ? 'text' : 'password',
           }}
         />
 
@@ -128,7 +122,6 @@ const Login = () => {
           variant="contained"
           color="primary"
           fullWidth
-          endIcon={<LoginIcon />}
           sx={{mt: 3}}
         >
           Вход

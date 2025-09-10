@@ -12,9 +12,8 @@ import {
   Button,
   CircularProgress,
   Typography,
-  Stack
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import e from 'cors';
 
 const FileList = () => {
   const [files, setFiles] = useState ([]);
@@ -82,21 +81,9 @@ const FileList = () => {
 
   return (
     <div className="max-w-5xl mx-auto mt-8">
-      <Stack direction='row' alignItems='center' justifyContent='space-between' className='mb-4'>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate ('/dashboard')}
-        >
-          Към списъка с потребители
-        </Button>
-        <Typography
-          variant='h4'
-          className='text-center flex-1'
-        >
-          Качени файлове
-        </Typography>
-      </Stack>
+      <Typography variant="h4" className="mb-4 text-center">
+        Качени файлове
+      </Typography>
 
       {files.length === 0
         ? <Typography className="text-center text-gray-600">
@@ -123,19 +110,6 @@ const FileList = () => {
                     <TableCell>{file.department?.departmentName || '-'}</TableCell>
                     <TableCell>{file.uploadedBy?.email || '-' }</TableCell>
                     <TableCell>{file.lastDownloadedBy?.email || '-' }</TableCell>
-                    <TableCell>{file.description || '-'}</TableCell>
-                    <TableCell>
-                      {file.createdAt ? new Date (file.createdAt).toLocaleDateString () : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleDownload (file.id, file.filename)}
-                      >
-                        Свали
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
