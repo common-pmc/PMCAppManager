@@ -15,11 +15,7 @@ import {
   TextField,
   Typography,
   Alert,
-  IconButton,
-  InputAdornment,
 } from '@mui/material';
-import {Visibility, VisibilityOff} from '@mui/icons-material';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 const Register = () => {
   const [formData, setFormData] = useState ({
@@ -33,7 +29,6 @@ const Register = () => {
   const [departments, setDepartments] = useState ([]);
   const [error, setError] = useState ('');
   const [success, setSuccess] = useState ('');
-  const [showPassword, setShowPassword] = useState (false);
 
   const navigate = useNavigate ();
 
@@ -152,24 +147,9 @@ const Register = () => {
           margin="normal"
           variant="standard"
           required
-          slotProps={{
-            input: {
-              type: showPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword (!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
         />
 
-        <FormControl required variant="standard" fullWidth margin="normal">
+        <FormControl variant="standard" fullWidth margin="normal">
           <InputLabel id="company-label">Фирма</InputLabel>
           <Select
             labelId="company-label"
@@ -187,7 +167,7 @@ const Register = () => {
         </FormControl>
 
         {departments.length > 0 &&
-          <FormControl required variant="standard" fullWidth margin="normal">
+          <FormControl variant="standard" fullWidth margin="normal">
             <InputLabel id="department-label">Отдел</InputLabel>
             <Select
               labelId="department-label"
@@ -217,21 +197,17 @@ const Register = () => {
         />
 
         <Grid container justifyContent="space-between" sx={{mt: 1, mb: 2}}>
-          <Typography variant="body2">
-            Няма я фирмата?{' '}
-            <Link to="/admin/companies/new" style={{color: '#1976d2'}}>
-              Добави фирма / отдел
-            </Link>
-          </Typography>
+          <Grid item>
+            <Typography variant="body2">
+              Няма я фирмата?{' '}
+              <Link to="/admin/companies/new" style={{color: '#1976d2'}}>
+                Добави фирма / отдел
+              </Link>
+            </Typography>
+          </Grid>
         </Grid>
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          endIcon={<HowToRegIcon />}
-        >
+        <Button type="submit" variant="contained" color="primary" fullWidth>
           Регистрация
         </Button>
 

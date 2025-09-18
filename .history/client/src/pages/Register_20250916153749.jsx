@@ -225,13 +225,7 @@ const Register = () => {
           </Typography>
         </Grid>
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          endIcon={<HowToRegIcon />}
-        >
+        <Button type="submit" variant="contained" color="primary" fullWidth>
           Регистрация
         </Button>
 

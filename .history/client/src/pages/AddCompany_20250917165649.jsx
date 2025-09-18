@@ -9,7 +9,7 @@ import {
   Typography,
   Alert,
   IconButton,
-  InputAdornment,
+  startAdornment,
   Stack,
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
@@ -75,7 +75,7 @@ const AddCompany = () => {
 
         <TextField
           label="Име на фирма"
-          variant="standard"
+          variant="outlined"
           fullWidth
           value={companyName}
           onChange={e => setCompanyName (e.target.value)}
@@ -83,63 +83,10 @@ const AddCompany = () => {
           required
           slotProps={{
             input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <BusinessIcon sx={{mr: 1, color: 'action.active'}} />
-                </InputAdornment>
-              ),
+              className: 'text-black',
             },
           }}
         />
-
-        {departments.map ((departments, index) => (
-          <TextField
-            key={index}
-            fullWidth
-            label={`Отдел ${index + 1}`}
-            variant="standard"
-            value={departments}
-            onChange={e => handleDepartmentChange (index, e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <ApartmentIcon sx={{mr: 1, color: 'action.active'}} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-        ))}
-
-        <Box display="flex" justifyContent="flex-end" mb={3}>
-          <IconButton
-            color="primary"
-            onClick={addDepartmentField}
-            title="Добави отдел"
-          >
-            <AddCircleOutlineIcon />
-          </IconButton>
-        </Box>
-
-        {message &&
-          <Alert
-            severity={message.includes ('успешно') ? 'success' : 'error'}
-            sx={{mb: 2}}
-          >
-            {message}
-          </Alert>}
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="success"
-          startIcon={<SaveIcon />}
-          fullWidth
-        >
-          Запази фирмата
-        </Button>
-
       </Box>
     </Container>
   );

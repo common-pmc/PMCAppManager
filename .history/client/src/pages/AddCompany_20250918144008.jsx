@@ -92,12 +92,12 @@ const AddCompany = () => {
           }}
         />
 
-        {departments.map ((departments, index) => (
+        {departments.map ((departments, index) => {
           <TextField
             key={index}
             fullWidth
             label={`Отдел ${index + 1}`}
-            variant="standard"
+            variant="outlined"
             value={departments}
             onChange={e => handleDepartmentChange (index, e.target.value)}
             slotProps={{
@@ -109,8 +109,8 @@ const AddCompany = () => {
                 ),
               },
             }}
-          />
-        ))}
+          />;
+        })}
 
         <Box display="flex" justifyContent="flex-end" mb={3}>
           <IconButton
@@ -121,24 +121,6 @@ const AddCompany = () => {
             <AddCircleOutlineIcon />
           </IconButton>
         </Box>
-
-        {message &&
-          <Alert
-            severity={message.includes ('успешно') ? 'success' : 'error'}
-            sx={{mb: 2}}
-          >
-            {message}
-          </Alert>}
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="success"
-          startIcon={<SaveIcon />}
-          fullWidth
-        >
-          Запази фирмата
-        </Button>
 
       </Box>
     </Container>

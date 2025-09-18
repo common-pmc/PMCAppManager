@@ -112,15 +112,14 @@ const AddCompany = () => {
           />
         ))}
 
-        <Box display="flex" justifyContent="flex-end" mb={3}>
-          <IconButton
-            color="primary"
-            onClick={addDepartmentField}
-            title="Добави отдел"
-          >
-            <AddCircleOutlineIcon />
-          </IconButton>
-        </Box>
+        <Button
+          variant="outlined"
+          startIcon={<AddCircleOutlineIcon />}
+          onClick={addDepartmentField}
+          sx={{mb: 3}}
+        >
+          Добави отдел
+        </Button>
 
         {message &&
           <Alert

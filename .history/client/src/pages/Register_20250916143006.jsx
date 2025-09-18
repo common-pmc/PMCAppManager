@@ -15,11 +15,7 @@ import {
   TextField,
   Typography,
   Alert,
-  IconButton,
-  InputAdornment,
 } from '@mui/material';
-import {Visibility, VisibilityOff} from '@mui/icons-material';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 const Register = () => {
   const [formData, setFormData] = useState ({
@@ -33,7 +29,6 @@ const Register = () => {
   const [departments, setDepartments] = useState ([]);
   const [error, setError] = useState ('');
   const [success, setSuccess] = useState ('');
-  const [showPassword, setShowPassword] = useState (false);
 
   const navigate = useNavigate ();
 
@@ -152,57 +147,60 @@ const Register = () => {
           margin="normal"
           variant="standard"
           required
-          slotProps={{
-            input: {
-              type: showPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword (!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            },
-          }}
         />
 
-        <FormControl required variant="standard" fullWidth margin="normal">
-          <InputLabel id="company-label">Фирма</InputLabel>
+        <FormControl
+          variant="standard"
+          fullWidth
+          sx={{marginTop: 4, minWidth: 120}}
+          required
+        >
+          <InputLabel id="companyId">Фирма</InputLabel>
           <Select
-            labelId="company-label"
+            labelId="companyId"
             name="companyId"
             value={formData.companyId}
             onChange={handleCompanyChange}
-            label="Фирма"
+            fullWidth
+            margin="normal"
+            variant="standard"
+            required
           >
             {companies.map (company => (
-              <MenuItem key={company.id} value={company.id}>
+              <MenuItem key={company.companyId} value={company.companyId}>
                 {company.companyName}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
 
-        {departments.length > 0 &&
-          <FormControl required variant="standard" fullWidth margin="normal">
-            <InputLabel id="department-label">Отдел</InputLabel>
-            <Select
-              labelId="department-label"
-              name="departmentId"
-              value={formData.departmentId}
-              onChange={handleChange}
-              label="Отдел"
-            >
-              {departments.map (department => (
-                <MenuItem key={department.id} value={department.id}>
-                  {department.departmentName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>}
+        <FormControl
+          variant="standard"
+          fullWidth
+          sx={{marginTop: 4, minWidth: 120}}
+          required
+        >
+          <InputLabel id="departmentId">Отдел</InputLabel>
+          <Select
+            labelId="departmentId"
+            name="departmentId"
+            value={formData.departmentId}
+            onChange={handleChange}
+            fullWidth
+            margin="normal"
+            variant="standard"
+            required
+          >
+            {departments.map (department => (
+              <MenuItem
+                key={department.departmentId}
+                value={department.departmentId}
+              >
+                {department.departmentName}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <FormControlLabel
           control={
@@ -213,27 +211,7 @@ const Register = () => {
             />
           }
           label="Администратор"
-          margin="normal"
         />
-
-        <Grid container justifyContent="space-between" sx={{mt: 1, mb: 2}}>
-          <Typography variant="body2">
-            Няма я фирмата?{' '}
-            <Link to="/admin/companies/new" style={{color: '#1976d2'}}>
-              Добави фирма / отдел
-            </Link>
-          </Typography>
-        </Grid>
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          endIcon={<HowToRegIcon />}
-        >
-          Регистрация
-        </Button>
 
       </Box>
     </Container>

@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Container,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -230,11 +231,6 @@ const UploadForm = () => {
         >
           Качи файл
         </Button>
-
-        {message &&
-          <Typography variant="body2" color="success">{message}</Typography>}
-        {error &&
-          <Typography variant="body2" color="error">{error}</Typography>}
 
       </Box>
     </Container>

@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Container,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -135,8 +136,9 @@ const UploadForm = () => {
           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <Typography variant="h6" component="h2" sx={{mb: 4}} gutterBottom>
-          Избор на файл за качване
+        <Typography variant="h6" gutterBottom>
+          <UploadFileIcon sx={{mr: 1, verticalAlign: 'middle'}} />
+          Качи нов файл
         </Typography>
 
         <Button
@@ -220,21 +222,9 @@ const UploadForm = () => {
             <Typography variant="caption">{progress}%</Typography>
           </Box>}
 
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          startIcon={<UploadFileIcon />}
-          sx={{mb: 2}}
-        >
+        <Button type="submit" variant="contained" color="primary" fullWidth>
           Качи файл
         </Button>
-
-        {message &&
-          <Typography variant="body2" color="success">{message}</Typography>}
-        {error &&
-          <Typography variant="body2" color="error">{error}</Typography>}
 
       </Box>
     </Container>

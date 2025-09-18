@@ -11,7 +11,7 @@ import {
   Select,
   TextField,
   Typography,
-  LinearProgress,
+  CircularProgress,
   InputAdornment,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -216,7 +216,7 @@ const UploadForm = () => {
 
         {progress > 0 &&
           <Box sx={{mb: 2}}>
-            <LinearProgress variant="determinate" value={progress} />
+            <CircularProgress variant="determinate" value={progress} />
             <Typography variant="caption">{progress}%</Typography>
           </Box>}
 

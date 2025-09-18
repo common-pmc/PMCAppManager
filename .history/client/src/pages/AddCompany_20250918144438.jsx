@@ -92,12 +92,12 @@ const AddCompany = () => {
           }}
         />
 
-        {departments.map ((departments, index) => (
+        {departments.map ((departments, index) => {
           <TextField
             key={index}
             fullWidth
             label={`Отдел ${index + 1}`}
-            variant="standard"
+            variant="outlined"
             value={departments}
             onChange={e => handleDepartmentChange (index, e.target.value)}
             slotProps={{
@@ -109,18 +109,17 @@ const AddCompany = () => {
                 ),
               },
             }}
-          />
-        ))}
+          />;
+        })}
 
-        <Box display="flex" justifyContent="flex-end" mb={3}>
-          <IconButton
-            color="primary"
-            onClick={addDepartmentField}
-            title="Добави отдел"
-          >
-            <AddCircleOutlineIcon />
-          </IconButton>
-        </Box>
+        <Button
+          variant="outlined"
+          startIcon={<AddCircleOutlineIcon />}
+          onClick={addDepartmentField}
+          sx={{mb: 3}}
+        >
+          Добави отдел
+        </Button>
 
         {message &&
           <Alert

@@ -4,20 +4,12 @@ import axiosInstance from '../api/axiosInstance';
 import {
   Box,
   Button,
-  Container,
+  CircularProgress,
   FormControl,
-  InputLabel,
   MenuItem,
   Select,
   TextField,
-  Typography,
-  LinearProgress,
-  InputAdornment,
 } from '@mui/material';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import BusinessIcon from '@mui/icons-material/Business';
-import ApartmentIcon from '@mui/icons-material/Apartment';
-import DescriptionIcon from '@mui/icons-material/Description';
 
 const UploadForm = () => {
   const [file, setFile] = useState (null);
@@ -123,121 +115,100 @@ const UploadForm = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        component="form"
+    <div>
+      <form
+        className="max-w-md mx-auto p-4 bg-white shadow rounded"
         onSubmit={handleSubmit}
-        sx={{
-          marginTop: 8,
-          padding: 4,
-          backgroundColor: '#f5f5f5',
-          borderRadius: '4px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        }}
       >
-        <Typography variant="h6" component="h2" sx={{mb: 4}} gutterBottom>
-          Избор на файл за качване
-        </Typography>
-
-        <Button
-          variant="contained"
-          component="label"
-          startIcon={<UploadFileIcon />}
-          fullWidth
-          sx={{mb: 2}}
-        >
-          Избери файл
-          <input type="file" onChange={handleFileChange} hidden required />
-        </Button>
-        {file &&
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            Избран файл: {file.name}
-          </Typography>}
-
-        <FormControl fullWidth sx={{mb: 2}}>
-          <InputLabel id="company-label">
-            <BusinessIcon sx={{mr: 1, verticalAlign: 'middle'}} />
-            Избери фирма
-          </InputLabel>
-          <Select
-            labelId="company-label"
-            value={selectedCompany}
-            onChange={handleCompanyChange}
-            variant="standard"
-            required
+        <div className="mb-4">
+          <label
+            htmlFor="file-upload"
+            className="cursor-pointer bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded inline-block"
           >
-            {companies.map (company => (
-              <MenuItem key={company.id} value={company.id}>
-                {company.companyName}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            Избери файл
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            onChange={handleFileChange}
+            className="hidden"
+            required
+          />
+          {file &&
+            <p className="text-sm mt-2 text-gray-600">
+              Избран файл: {file.name}
+            </p>}
+        </div>
+        <select
+          value={selectedCompany}
+          onChange={handleCompanyChange}
+          className="w-full p-2 border border-gray-300 rounded mb-4"
+          required
+        >
+          <option value="">Избери фирма</option>
+          {companies.map (company => (
+            <option key={company.id} value={company.id}>
+              {company.companyName}
+            </option>
+          ))}
+        </select>
 
         {departments.length > 0 &&
-          <FormControl fullWidth sx={{mb: 2}}>
-            <InputLabel id="department-label">
-              <ApartmentIcon sx={{mr: 1, verticalAlign: 'middle'}} />
-              Избери отдел
-            </InputLabel>
-            <Select
-              labelId="department-label"
-              value={selectedDepartment}
-              onChange={e => setSelectedDepartment (e.target.value)}
-              variant="standard"
-            >
-              {departments.map (department => (
-                <MenuItem key={department.id} value={department.id}>
-                  {department.departmentName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>}
+          <select
+            value={selectedDepartment}
+            onChange={e => setSelectedDepartment (e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-4"
+          >
+            <option value="">Избери отдел (по избор)</option>
+            {departments.map (dept => (
+              <option key={dept.id} value={dept.id}>
+                {dept.departmentName}
+              </option>
+            ))}
+          </select>}
 
-        <TextField
-          placeholder="Описание (по избор)"
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={4}
+        <textarea
           value={description}
           onChange={e => setDescription (e.target.value)}
-          sx={{mb: 2}}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <DescriptionIcon sx={{mr: 1, verticalAlign: 'middle'}} />
-                </InputAdornment>
-              ),
-            },
-          }}
+          placeholder="Описание (по избор)"
+          className="w-full p-2 border border-gray-300 rounded mb-4"
+          rows="3"
         />
 
         {progress > 0 &&
-          <Box sx={{mb: 2}}>
-            <LinearProgress variant="determinate" value={progress} />
-            <Typography variant="caption">{progress}%</Typography>
-          </Box>}
+          <div className="w-full bg-gray-200 rounded-full mb-4">
+            <div
+              className="bg-blue-500 text-xs leading-none py-1 text-center text-white rounded-full"
+              style={{width: `${progress}%`}}
+            >
+              {progress}%
+            </div>
+          </div>}
 
-        <Button
+        <button
           type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          startIcon={<UploadFileIcon />}
-          sx={{mb: 2}}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
         >
           Качи файл
-        </Button>
+        </button>
 
         {message &&
-          <Typography variant="body2" color="success">{message}</Typography>}
-        {error &&
-          <Typography variant="body2" color="error">{error}</Typography>}
-
-      </Box>
-    </Container>
+          <p className="mt-4 text-green-600 font-semibold">{message}</p>}
+        {error && <p className="mt-4 text-red-600 font-semibold">{error}</p>}
+        {uploadedFileUrl &&
+          <div className="mt-4">
+            <p className="font-semibold">Каченият файл е достъпен на:</p>
+            <a
+              href={uploadedFileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-500 underline"
+            >
+              {uploadedFileUrl}
+            </a>
+          </div>}
+      </form>
+    </div>
   );
 };
 

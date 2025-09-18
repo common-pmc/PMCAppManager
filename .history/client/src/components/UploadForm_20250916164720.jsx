@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Container,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -12,7 +13,6 @@ import {
   TextField,
   Typography,
   LinearProgress,
-  InputAdornment,
 } from '@mui/material';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -123,121 +123,15 @@ const UploadForm = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          marginTop: 8,
-          padding: 4,
-          backgroundColor: '#f5f5f5',
-          borderRadius: '4px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <Typography variant="h6" component="h2" sx={{mb: 4}} gutterBottom>
-          Избор на файл за качване
-        </Typography>
-
-        <Button
-          variant="contained"
-          component="label"
-          startIcon={<UploadFileIcon />}
-          fullWidth
-          sx={{mb: 2}}
-        >
-          Избери файл
-          <input type="file" onChange={handleFileChange} hidden required />
-        </Button>
-        {file &&
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            Избран файл: {file.name}
-          </Typography>}
-
-        <FormControl fullWidth sx={{mb: 2}}>
-          <InputLabel id="company-label">
-            <BusinessIcon sx={{mr: 1, verticalAlign: 'middle'}} />
-            Избери фирма
-          </InputLabel>
-          <Select
-            labelId="company-label"
-            value={selectedCompany}
-            onChange={handleCompanyChange}
-            variant="standard"
-            required
-          >
-            {companies.map (company => (
-              <MenuItem key={company.id} value={company.id}>
-                {company.companyName}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {departments.length > 0 &&
-          <FormControl fullWidth sx={{mb: 2}}>
-            <InputLabel id="department-label">
-              <ApartmentIcon sx={{mr: 1, verticalAlign: 'middle'}} />
-              Избери отдел
-            </InputLabel>
-            <Select
-              labelId="department-label"
-              value={selectedDepartment}
-              onChange={e => setSelectedDepartment (e.target.value)}
-              variant="standard"
-            >
-              {departments.map (department => (
-                <MenuItem key={department.id} value={department.id}>
-                  {department.departmentName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>}
-
-        <TextField
-          placeholder="Описание (по избор)"
-          variant="outlined"
-          fullWidth
-          multiline
-          rows={4}
-          value={description}
-          onChange={e => setDescription (e.target.value)}
-          sx={{mb: 2}}
-          slotProps={{
-            input: {
-              startAdornment: (
-                <InputAdornment position="start">
-                  <DescriptionIcon sx={{mr: 1, verticalAlign: 'middle'}} />
-                </InputAdornment>
-              ),
-            },
-          }}
-        />
-
-        {progress > 0 &&
-          <Box sx={{mb: 2}}>
-            <LinearProgress variant="determinate" value={progress} />
-            <Typography variant="caption">{progress}%</Typography>
-          </Box>}
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          startIcon={<UploadFileIcon />}
-          sx={{mb: 2}}
-        >
-          Качи файл
-        </Button>
-
-        {message &&
-          <Typography variant="body2" color="success">{message}</Typography>}
-        {error &&
-          <Typography variant="body2" color="error">{error}</Typography>}
-
-      </Box>
-    </Container>
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="flex-start"
+      minHeight="100vh"
+      bgcolor="white"
+    >
+      <Box>jghfg</Box>
+    </Box>
   );
 };
 
