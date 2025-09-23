@@ -35,8 +35,6 @@ const Dashboard = () => {
       });
   }, []);
 
-  const handleDeleteUser = () => {};
-
   return (
     <Container maxWidth="lg" sx={{py: 4}}>
       <Typography variant="h4" sx={{mb: 4}} fontWeight="bold">
@@ -91,16 +89,6 @@ const Dashboard = () => {
                         onClick={() => navigate (`/admin/user/${user.id}`)}
                       >
                         Детайли
-                      </Button>
-
-                      <Button
-                        variant="contained"
-                        color="danger"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleDeleteUser}
-                      >
-                        Изтрий
                       </Button>
                     </Stack>
                   </TableCell>

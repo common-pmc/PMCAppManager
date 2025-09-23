@@ -3,6 +3,7 @@ import axiosInstance from '../api/axiosInstance';
 import {useNavigate} from 'react-router-dom';
 import {
   Container,
+  Box,
   Typography,
   Table,
   TableBody,
@@ -16,9 +17,6 @@ import {
   Alert,
   Chip,
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ToggleONIcon from '@mui/icons-material/ToggleOn';
 
 const Dashboard = () => {
   const [users, setUsers] = useState ([]);
@@ -34,8 +32,6 @@ const Dashboard = () => {
         setError ('Грешка при зареждане на потребителите');
       });
   }, []);
-
-  const handleDeleteUser = () => {};
 
   return (
     <Container maxWidth="lg" sx={{py: 4}}>
@@ -54,7 +50,6 @@ const Dashboard = () => {
                 <TableCell>Фирма</TableCell>
                 <TableCell>Отдел</TableCell>
                 <TableCell align="center"><b>Админ</b></TableCell>
-                <TableCell align="center">Действия</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -75,34 +70,7 @@ const Dashboard = () => {
                   <TableCell>
                     {user.Department && user.Department.departmentName
                       ? user.Department.departmentName
-                      : ''}
-                  </TableCell>
-                  <TableCell align="center">
-                    {user.isAdmin &&
-                      <Chip label="Да" color="primary" size="small" />}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Stack direction="row" spacing={1} justifyContent="center">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="info"
-                        startIcon={<InfoIcon />}
-                        onClick={() => navigate (`/admin/user/${user.id}`)}
-                      >
-                        Детайли
-                      </Button>
-
-                      <Button
-                        variant="contained"
-                        color="danger"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleDeleteUser}
-                      >
-                        Изтрий
-                      </Button>
-                    </Stack>
+                      : <Typography>mgh</Typography>}
                   </TableCell>
                 </TableRow>
               ))}
@@ -110,36 +78,6 @@ const Dashboard = () => {
           </Table>
         </TableContainer>
       </Paper>
-
-      <Stack direction="row" spacing={2} sx={{mb: 2}}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate ('/admin/register')}
-        >
-          Регистрирай нов потребител
-        </Button>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate ('/admin/upload')}
-        >
-          Качи файл
-        </Button>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate ('/admin/files')}
-        >
-          Списък с файлове
-        </Button>
-
-        <Button>
-          Филтрирай файлове
-        </Button>
-      </Stack>
     </Container>
   );
 };

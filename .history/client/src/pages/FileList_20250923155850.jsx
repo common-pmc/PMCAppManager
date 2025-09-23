@@ -91,11 +91,7 @@ const FileList = () => {
         justifyContent='flex-start'
         mb={2}
       >
-        <Button
-          variant='outlined'
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate ('/admin/dashboard')}
-        >
+        <Button>
           Обратно към списъка с потребители
         </Button>
       </Stack>

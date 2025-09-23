@@ -86,16 +86,8 @@ const FileList = () => {
 
   return (
     <div className="max-w-5xl mx-auto mt-8">
-      <Stack
-        direction='row'
-        justifyContent='flex-start'
-        mb={2}
-      >
-        <Button
-          variant='outlined'
-          startIcon={<ArrowBackIcon />}
-          onClick={() => navigate ('/admin/dashboard')}
-        >
+      <Stack>
+        <Button>
           Обратно към списъка с потребители
         </Button>
       </Stack>

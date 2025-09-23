@@ -16,9 +16,9 @@ import {
   Alert,
   Chip,
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ToggleONIcon from '@mui/icons-material/ToggleOn';
+import {InfoIcon} from '@mui/icons-material/Info';
+import {DeleteIcon} from '@mui/icons-material/Delete';
+import {ToggleONIcon} from '@mui/icons-material/ToggleOn';
 
 const Dashboard = () => {
   const [users, setUsers] = useState ([]);
@@ -34,8 +34,6 @@ const Dashboard = () => {
         setError ('Грешка при зареждане на потребителите');
       });
   }, []);
-
-  const handleDeleteUser = () => {};
 
   return (
     <Container maxWidth="lg" sx={{py: 4}}>
@@ -80,29 +78,6 @@ const Dashboard = () => {
                   <TableCell align="center">
                     {user.isAdmin &&
                       <Chip label="Да" color="primary" size="small" />}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Stack direction="row" spacing={1} justifyContent="center">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="info"
-                        startIcon={<InfoIcon />}
-                        onClick={() => navigate (`/admin/user/${user.id}`)}
-                      >
-                        Детайли
-                      </Button>
-
-                      <Button
-                        variant="contained"
-                        color="danger"
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={handleDeleteUser}
-                      >
-                        Изтрий
-                      </Button>
-                    </Stack>
                   </TableCell>
                 </TableRow>
               ))}

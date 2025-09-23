@@ -85,22 +85,14 @@ const FileList = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto mt-8">
-      <Stack
-        direction='row'
-        justifyContent='flex-start'
-        mb={2}
-      >
-        <Button
-          variant='outlined'
+    <div className="max-w-5xl mx-auto mt-8" style={{position: 'relative'}}>
+      <Button
+          variant="outlined"
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate ('/admin/dashboard')}
         >
-          Обратно към списъка с потребители
+          Към списъка с потребители
         </Button>
-      </Stack>
-
-
       <Stack direction='row' alignItems='center' justifyContent='space-between' className='mb-4'>
         <Typography
           variant='h4'
