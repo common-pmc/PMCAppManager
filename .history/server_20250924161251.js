@@ -6,9 +6,11 @@ const colors = require ('colors');
 const db = require ('./database/models');
 const authRoutes = require ('./routes/authRoutes');
 const userRoutes = require ('./routes/userRoutes');
-const fileRoutes = require ('./routes/fileRoutes');
+const adminFileRoutes = require ('./routes/adminFileRoutes');
+const userFileRoutes = require ('./routes/userFileRoutes');
 const logRoutes = require ('./routes/logRoutes');
 const companyRoutes = require ('./routes/companyRoutes');
+const adminUserRoutes = require ('./routes/adminUserRoutes');
 
 require ('dotenv').config ();
 
@@ -46,15 +48,23 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.use (cors ());
+app.use (
+  cors ({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true,
+  })
+);
 app.use (express.json ());
 app.use ('/uploads', express.static (path.join (__dirname, 'uploads'))); // Статични файлове за качени файлове
 
 app.use ('/api/auth', authRoutes);
 app.use ('/api/users', userRoutes);
-app.use ('/api/files', fileRoutes);
+app.use ('/api/admin', adminFileRoutes);
+app.use ('/api/user', userFileRoutes);
 app.use ('/api/logs', logRoutes);
 app.use ('/api/companies', companyRoutes);
+app.use ('/api/admin/users', adminUserRoutes);
 
 db.sequelize
   .authenticate ()

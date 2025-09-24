@@ -19,7 +19,6 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ToggleONIcon from '@mui/icons-material/ToggleOn';
-import axios from 'axios';
 
 const Dashboard = () => {
   const [users, setUsers] = useState ([]);
@@ -36,21 +35,7 @@ const Dashboard = () => {
       });
   }, []);
 
-  const handleDeleteUser = id => {
-    if (
-      window.confirm ('Сигурни ли сте, че искате да изтриете този потребител?')
-    ) {
-      axiosInstance
-        .delete (`/users/${id}`)
-        .then (() => {
-          setUsers (users.filter (user => user.id !== id));
-        })
-        .catch (err => {
-          console.error ('Error:', err);
-          setError ('Грешка при изтриване на потребителя');
-        });
-    }
-  };
+  const handleDeleteUser = () => {};
 
   return (
     <Container maxWidth="lg" sx={{py: 4}}>
@@ -66,9 +51,9 @@ const Dashboard = () => {
             <TableHead>
               <TableRow>
                 <TableCell><b>Имейл</b></TableCell>
-                <TableCell><b>Фирма</b></TableCell>
-                <TableCell><b>Отдел</b></TableCell>
-                <TableCell align="center"><b>Действия</b></TableCell>
+                <TableCell>Фирма</TableCell>
+                <TableCell>Отдел</TableCell>
+                <TableCell align="center">Действия</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

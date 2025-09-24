@@ -10,6 +10,7 @@ const adminFileRoutes = require ('./routes/adminFileRoutes');
 const userFileRoutes = require ('./routes/userFileRoutes');
 const logRoutes = require ('./routes/logRoutes');
 const companyRoutes = require ('./routes/companyRoutes');
+const adminUserRoutes = require ('./routes/adminUserRoutes');
 
 require ('dotenv').config ();
 
@@ -63,6 +64,7 @@ app.use ('/api/admin', adminFileRoutes);
 app.use ('/api/user', userFileRoutes);
 app.use ('/api/logs', logRoutes);
 app.use ('/api/companies', companyRoutes);
+app.use ('/api/admin/users', adminUserRoutes);
 
 db.sequelize
   .authenticate ()

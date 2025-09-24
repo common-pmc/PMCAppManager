@@ -8,6 +8,7 @@ import Unauthorized from './pages/Unauthorized';
 import UploadPage from './pages/Upload';
 import FileList from './pages/FileList';
 import AddCompany from './pages/AddCompany';
+import AdminUserDetails from './pages/AdminUserDetails';
 
 import './App.css';
 
@@ -17,7 +18,7 @@ function App () {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route
-          path="/register"
+          path="/admin/register"
           element={
             <ProtectedRoute requiredAdmin={true}>
               <Register />
@@ -25,7 +26,7 @@ function App () {
           }
         />
         <Route
-          path="/upload"
+          path="/admin/upload"
           element={
             <ProtectedRoute requiredAdmin={true}>
               <UploadPage />
@@ -33,7 +34,15 @@ function App () {
           }
         />
         <Route
-          path="/dashboard"
+          path="/admin/users/:id"
+          element={
+            <ProtectedRoute requiredAdmin={true}>
+              <AdminUserDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
           element={
             <ProtectedRoute requiredAdmin={true}>
               <Dashboard />
@@ -41,7 +50,7 @@ function App () {
           }
         />
         <Route
-          path="/files"
+          path="/admin/files"
           element={
             <ProtectedRoute requiredAdmin={true}>
               <FileList />
