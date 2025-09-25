@@ -156,8 +156,6 @@ exports.deleteUser = async (req, res) => {
       isActive: false,
       deletedAt: new Date (),
     });
-
-    res.json ({message: 'Потребителят е изтрит успешно.'});
   } catch (error) {
     //
   }

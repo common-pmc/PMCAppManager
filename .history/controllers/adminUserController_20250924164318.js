@@ -1,3 +1,4 @@
+const {where} = require ('sequelize');
 const {
   File,
   User,
@@ -132,33 +133,4 @@ exports.getUserDetails = async (req, res) => {
   }
 };
 
-exports.deleteUser = async (req, res) => {
-  // Изтриване на потребител по ID - потребителят получава флаг isDeleted = true (т.нар. soft delete)
-  try {
-    const id = req.params.id;
-    const user = await User.findByPk (id);
-    if (!user) {
-      return res.status (404).json ({error: 'Потребителят не е намерен.'});
-    }
-    if (user.isDeleted) {
-      return res.status (400).json ({error: 'Потребителят вече е изтрит.'});
-    }
-
-    // Администраторът не може да изтрие сам себе си
-    if (req.user && req.user.id === user.id) {
-      return res
-        .status (400)
-        .json ({error: 'Администраторът не може да изтрие сам себе си.'});
-    }
-
-    await user.update ({
-      isDeleted: true,
-      isActive: false,
-      deletedAt: new Date (),
-    });
-
-    res.json ({message: 'Потребителят е изтрит успешно.'});
-  } catch (error) {
-    //
-  }
-};
+exports.deleteUser = async (req, res) => {};

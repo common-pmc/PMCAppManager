@@ -7,8 +7,8 @@ const {
 
 const router = express.Router ();
 
-router.get ('/:id', verifyToken, isAdmin, getUserDetails);
+router.get ('/users/:id', verifyToken, isAdmin, getUserDetails);
 
-router.delete ('/:id', verifyToken, isAdmin, deleteUser);
+router.delete ('/users/:id', verifyToken, isAdmin, deleteUser);
 
 module.exports = router;

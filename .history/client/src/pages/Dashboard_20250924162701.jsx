@@ -18,6 +18,7 @@ import {
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ToggleONIcon from '@mui/icons-material/ToggleOn';
 
 const Dashboard = () => {
   const [users, setUsers] = useState ([]);
@@ -39,7 +40,7 @@ const Dashboard = () => {
       window.confirm ('Сигурни ли сте, че искате да изтриете този потребител?')
     ) {
       axiosInstance
-        .delete (`/admin/users/${id}`)
+        .delete (`/users/${id}`)
         .then (() => {
           setUsers (users.filter (user => user.id !== id));
         })
@@ -106,7 +107,7 @@ const Dashboard = () => {
                         color="danger"
                         size="small"
                         startIcon={<DeleteIcon />}
-                        onClick={() => handleDeleteUser (user.id)}
+                        onClick={handleDeleteUser}
                       >
                         Изтрий
                       </Button>

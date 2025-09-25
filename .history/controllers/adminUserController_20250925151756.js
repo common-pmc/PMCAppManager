@@ -1,3 +1,4 @@
+const {where} = require ('sequelize');
 const {
   File,
   User,
@@ -143,21 +144,6 @@ exports.deleteUser = async (req, res) => {
     if (user.isDeleted) {
       return res.status (400).json ({error: 'Потребителят вече е изтрит.'});
     }
-
-    // Администраторът не може да изтрие сам себе си
-    if (req.user && req.user.id === user.id) {
-      return res
-        .status (400)
-        .json ({error: 'Администраторът не може да изтрие сам себе си.'});
-    }
-
-    await user.update ({
-      isDeleted: true,
-      isActive: false,
-      deletedAt: new Date (),
-    });
-
-    res.json ({message: 'Потребителят е изтрит успешно.'});
   } catch (error) {
     //
   }

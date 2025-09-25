@@ -39,7 +39,7 @@ const Dashboard = () => {
       window.confirm ('Сигурни ли сте, че искате да изтриете този потребител?')
     ) {
       axiosInstance
-        .delete (`/admin/users/${id}`)
+        .delete (`/admin/user/${id}`)
         .then (() => {
           setUsers (users.filter (user => user.id !== id));
         })

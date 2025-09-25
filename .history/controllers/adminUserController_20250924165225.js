@@ -1,3 +1,4 @@
+const {where} = require ('sequelize');
 const {
   File,
   User,
@@ -133,32 +134,36 @@ exports.getUserDetails = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  // Изтриване на потребител по ID - потребителят получава флаг isDeleted = true (т.нар. soft delete)
   try {
-    const id = req.params.id;
-    const user = await User.findByPk (id);
+    const targetId = parseInt (req.params.id);
+    if (isNaN (targetId)) {
+      return res.status (400).json ({error: 'Невалидно ID на потребител.'});
+    }
+
+    // Не може администратор да изтрие сам себе си
+    if (req.user.id === targetId) {
+      return res
+        .status (400)
+        .json ({error: 'Администратор не може да изтрие сам себе си.'});
+    }
+
+    // Проверка дали потребителят има качени файлове
+    const filesCount = await File.count ({where: {userId: targetId}});
+    if (filesCount > 0) {
+      return res.status (400).json ({
+        message: 'Потребителят има качени файлове. Моля прехвърлете или изтрийте файловете преди да изтриете потребителя.',
+      });
+    }
+
+    const user = await User.findByPk (targetId);
     if (!user) {
       return res.status (404).json ({error: 'Потребителят не е намерен.'});
     }
-    if (user.isDeleted) {
-      return res.status (400).json ({error: 'Потребителят вече е изтрит.'});
-    }
 
-    // Администраторът не може да изтрие сам себе си
-    if (req.user && req.user.id === user.id) {
-      return res
-        .status (400)
-        .json ({error: 'Администраторът не може да изтрие сам себе си.'});
-    }
-
-    await user.update ({
-      isDeleted: true,
-      isActive: false,
-      deletedAt: new Date (),
-    });
-
+    await user.destroy ();
     res.json ({message: 'Потребителят е изтрит успешно.'});
   } catch (error) {
-    //
+    console.error ('Грешка при изтриване на потребителя.', error);
+    res.status (500).json ({message: 'Грешка при изтриване на потребителя.'});
   }
 };
