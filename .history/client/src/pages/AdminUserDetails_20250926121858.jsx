@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, use} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import {
@@ -122,97 +122,15 @@ const AdminUserDetails = () => {
   if (!user) return <Container><Typography>Потребителят не е намерен.</Typography></Container>;
 
   return (
-      <Container maxWidth="lg" sx={{py: 4}}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} mb={2}>
-          <Button variant='outlined' startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')}>
+    <div>
+      <Container maxWidth="md" sx={{mt: 4, mb: 4}}>
+        <Stack>
+          <Button>
             Назад към потребители
           </Button>
-          <Chip 
-            label={user.isActive ? 'Активен' : 'Деактивиран'} 
-            color={user.isActive ? 'success' : 'error'} 
-            icon={user.isActive ? <CheckCircleIcon /> : <BlockIcon />} 
-          />          
         </Stack>
-        <Stack>
-          <Typography variant='h4' element='h4' sx={{alignSelf: 'center', mb: 3}}>
-            Детайли за {user.email}
-          </Typography>         
-        </Stack>
-
-        <Paper sx={{p: 2, mb: 3}}>
-          <Stack direction="row" spacing={2} justifyContent='space-between' alignItems='center'>
-            <Stack>
-              <Typography variant='subtitle1'><b>Фирма:</b> {user.company?.name}</Typography>
-              <Typography variant='subtitle1'><b>Отдел:</b> {user.department?.name}</Typography>
-              <Typography variant='subtitle2' color='secondary'><b>Създаден:</b> {new Date(user.createdAt).toLocaleString()}</Typography>
-            </Stack>
-
-            <Stack direction="row" spacing={1}>
-              <Button
-                variant={user.isActive ? 'outlined' : 'contained'}
-                color={user.isActive ? 'warning' : 'success'}
-                startIcon={user.isActive ? <BlockIcon /> : <CheckCircleIcon />}
-                onClick={handleToggleActive}
-                disabled={actionLoading}
-              >
-                {user.isActive ? 'Деактивирай' : 'Активирай'}
-              </Button>
-
-              <Button
-                variant='contained'
-                color='error'
-                startIcon={<DeleteIcon />}
-                onClick={handleDelete}
-                disabled={actionLoading}
-              >
-                Изтрий потребителя
-              </Button>
-            </Stack>
-          </Stack>
-        </Paper>
-
-        <Typography variant='h6' sx={{mb: 2}}>Файлове, които потребителят е изтеглил</Typography>
-
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Име на файла</TableCell>
-                <TableCell>Фирма</TableCell>
-                <TableCell>Отдел</TableCell>
-                <TableCell>Изтеглен на</TableCell>
-                <TableCell>Свали</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                {downloads.length === 0 && (
-                  <TableCell colSpan={6} align="center">
-                    Потребителят все още не е изтеглил файлове.
-                  </TableCell>
-                )}
-              </TableRow>
-              {downloads.map((download) => (
-                <TableRow key={download.id}>
-                  <TableCell>{download.filename}</TableCell>
-                  <TableCell>{download.fileCompany?.name || '-'}</TableCell>
-                  <TableCell>{download.fileDepartment?.name || '-'}</TableCell>
-                  <TableCell>{new Date(download.downloadedAt).toLocaleString()}</TableCell>
-                  <TableCell>
-                    <IconButton 
-                      color="primary" 
-                      onClick={() => handleDownloadFile(download.fileId, download.filename)}
-                      disabled={!download.fileId}
-                    >
-                      <DownloadIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-    </Container>
+      </Container>
+    </div>
   );
 };
 

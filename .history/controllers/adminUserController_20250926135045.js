@@ -40,35 +40,73 @@ exports.getUserDetails = async (req, res) => {
 
     // 2) Взимаме история на тегленията (DownloadHistory) с файловете, сортирани по дата
     const history = await DownloadHistory.findAll ({
-      where: {userId: req.params.id},
+      where: {userId},
       include: [
         {
           model: File,
           as: 'File',
-          attributes: ['id', 'filename', 'createdAt'],
+          attributes: [
+            'id',
+            'filename',
+            'companyId',
+            'departmentId',
+            'createdAt',
+          ],
         },
       ],
       order: [['createdAt', 'DESC']],
     });
 
-    // 3) Форматиране на записите за фронтенда
+    // 3) Събираме уникалните companyId/departmentId от файловете
+    const companyIds = new Set ();
+    const departmentIds = new Set ();
+    history.forEach (entry => {
+      if (entry.File) {
+        if (entry.File.companyId) companyIds.add (entry.File.companyId);
+        if (entry.File.departmentId)
+          departmentIds.add (entry.File.departmentId);
+      }
+    });
+
+    const companies = companyIds.size
+      ? await Company.findAll ({
+          where: {id: Array.from (companyIds)},
+          attributes: ['id', 'companyName'],
+        })
+      : [];
+    const departments = departmentIds.size
+      ? await Department.findAll ({
+          where: {id: Array.from (departmentIds)},
+          attributes: ['id', 'departmentName'],
+        })
+      : [];
+
+    const companyMap = Object.fromEntries (
+      companies.map (c => [c.id, c.companyName])
+    );
+    const departmentMap = Object.fromEntries (
+      departments.map (d => [d.id, d.departmentName])
+    );
+
+    // 4) Форматираме записите за фронтенда
     const downloads = history.map (entry => {
       const file = entry.File || {};
       return {
         id: entry.id,
         fileId: file.id || null,
         filename: file.filename || null,
-        fileCompany: user.Company
-          ? {id: user.Company.id, name: user.Company.companyName}
+        originalname: file.originalname || file.filename || null,
+        fileCompany: file.companyId
+          ? {id: file.companyId, name: companyMap[file.companyId]}
           : null,
-        fileDepartment: user.Department
-          ? {id: user.Department.id, name: user.Department.departmentName}
+        fileDepartment: file.departmentId
+          ? {id: file.departmentId, name: departmentMap[file.departmentId]}
           : null,
         downloadedAt: entry.createdAt,
       };
     });
 
-    // 4) Връщане на структура user + downloads
+    // 5) Връщаме структура: user + downloads
     res.json ({
       user: {
         id: user.id,
@@ -83,7 +121,7 @@ exports.getUserDetails = async (req, res) => {
           : null,
         createdAt: user.createdAt,
       },
-      downloads,
+      downloads: downloads,
     });
   } catch (error) {
     console.error ('Грешка при извличане на детайли за потребителя.', error);

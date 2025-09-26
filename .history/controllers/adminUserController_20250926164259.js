@@ -46,6 +46,10 @@ exports.getUserDetails = async (req, res) => {
           model: File,
           as: 'File',
           attributes: ['id', 'filename', 'createdAt'],
+          include: [
+            {model: Company, attributes: ['id', 'companyName']},
+            {model: Department, attributes: ['id', 'departmentName']},
+          ],
         },
       ],
       order: [['createdAt', 'DESC']],

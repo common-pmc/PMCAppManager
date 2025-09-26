@@ -40,7 +40,7 @@ exports.getUserDetails = async (req, res) => {
 
     // 2) Взимаме история на тегленията (DownloadHistory) с файловете, сортирани по дата
     const history = await DownloadHistory.findAll ({
-      where: {userId: req.params.id},
+      where: {userId},
       include: [
         {
           model: File,
@@ -51,6 +51,7 @@ exports.getUserDetails = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
+    // 3) Форматираме записите за фронтенда
     // 3) Форматиране на записите за фронтенда
     const downloads = history.map (entry => {
       const file = entry.File || {};

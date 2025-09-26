@@ -123,20 +123,18 @@ const AdminUserDetails = () => {
 
   return (
       <Container maxWidth="lg" sx={{py: 4}}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} mb={2}>
+        <Stack direction="row" alignItems="center" spacing={2} mb={2}>
           <Button variant='outlined' startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')}>
             Назад към потребители
-          </Button>
+          </Button>          
+        </Stack>
+        <Stack>
+          <Typography variant='f5' element='h2' sx={{alignSelf: 'center'}}>Детайли за {user.email}</Typography>
           <Chip 
             label={user.isActive ? 'Активен' : 'Деактивиран'} 
             color={user.isActive ? 'success' : 'error'} 
             icon={user.isActive ? <CheckCircleIcon /> : <BlockIcon />} 
-          />          
-        </Stack>
-        <Stack>
-          <Typography variant='h4' element='h4' sx={{alignSelf: 'center', mb: 3}}>
-            Детайли за {user.email}
-          </Typography>         
+          />
         </Stack>
 
         <Paper sx={{p: 2, mb: 3}}>

@@ -123,27 +123,23 @@ const AdminUserDetails = () => {
 
   return (
       <Container maxWidth="lg" sx={{py: 4}}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} mb={2}>
+        <Stack direction="row" alignItems="center" spacing={2} mb={2}>
           <Button variant='outlined' startIcon={<ArrowBackIcon />} onClick={() => navigate('/admin/dashboard')}>
             Назад към потребители
           </Button>
+          <Typography variant='f5' sx={{alignSelf: 'center'}}>{user.email}</Typography>
           <Chip 
             label={user.isActive ? 'Активен' : 'Деактивиран'} 
             color={user.isActive ? 'success' : 'error'} 
             icon={user.isActive ? <CheckCircleIcon /> : <BlockIcon />} 
-          />          
-        </Stack>
-        <Stack>
-          <Typography variant='h4' element='h4' sx={{alignSelf: 'center', mb: 3}}>
-            Детайли за {user.email}
-          </Typography>         
+          />
         </Stack>
 
         <Paper sx={{p: 2, mb: 3}}>
           <Stack direction="row" spacing={2} justifyContent='space-between' alignItems='center'>
             <Stack>
-              <Typography variant='subtitle1'><b>Фирма:</b> {user.company?.name}</Typography>
-              <Typography variant='subtitle1'><b>Отдел:</b> {user.department?.name}</Typography>
+              <Typography variant='subtitle1'><b>Фирма:</b> {user.Company?.companyName}</Typography>
+              <Typography variant='subtitle1'><b>Отдел:</b> {user.Department?.departmentName}</Typography>
               <Typography variant='subtitle2' color='secondary'><b>Създаден:</b> {new Date(user.createdAt).toLocaleString()}</Typography>
             </Stack>
 
@@ -195,15 +191,11 @@ const AdminUserDetails = () => {
               {downloads.map((download) => (
                 <TableRow key={download.id}>
                   <TableCell>{download.filename}</TableCell>
-                  <TableCell>{download.fileCompany?.name || '-'}</TableCell>
-                  <TableCell>{download.fileDepartment?.name || '-'}</TableCell>
+                  <TableCell>{download.Company?.companyName || '-'}</TableCell>
+                  <TableCell>{download.Department?.departmentName || '-'}</TableCell>
                   <TableCell>{new Date(download.downloadedAt).toLocaleString()}</TableCell>
                   <TableCell>
-                    <IconButton 
-                      color="primary" 
-                      onClick={() => handleDownloadFile(download.fileId, download.filename)}
-                      disabled={!download.fileId}
-                    >
+                    <IconButton color="primary" onClick={() => handleDownloadFile(download.fileId, download.filename)}>
                       <DownloadIcon />
                     </IconButton>
                   </TableCell>

@@ -75,10 +75,10 @@ exports.getUserDetails = async (req, res) => {
         email: user.email,
         isAdmin: user.isAdmin,
         isActive: user.isActive,
-        company: user.Company
+        Company: user.Company
           ? {id: user.Company.id, name: user.Company.companyName}
           : null,
-        department: user.Department
+        Department: user.Department
           ? {id: user.Department.id, name: user.Department.departmentName}
           : null,
         createdAt: user.createdAt,
