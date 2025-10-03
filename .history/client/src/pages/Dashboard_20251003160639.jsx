@@ -111,6 +111,36 @@ const Dashboard = () => {
           </Button>
         ))}
       </Stack>
+
+      {/* <Stack direction="row" spacing={2} sx={{mb: 2}}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate ('/admin/register')}
+        >
+          Регистрирай нов потребител
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate ('/admin/upload')}
+        >
+          Качи файл
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate ('/admin/files')}
+        >
+          Списък с файлове
+        </Button>
+
+        <Button>
+          Филтрирай файлове
+        </Button>
+      </Stack> */}
     </Container>
   );
 };

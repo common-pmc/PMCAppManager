@@ -29,6 +29,7 @@ const FileList = () => {
       const response = await axiosInstance.get ('/admin/files', {
         withCredentials: true,
       });
+      console.log('admin/files response', response.data);
       setFiles (response.data);
       setLoading (false);
     } catch (error) {

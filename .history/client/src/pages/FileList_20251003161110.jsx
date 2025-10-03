@@ -94,7 +94,7 @@ const FileList = () => {
         <Button
           variant='outlined'
           startIcon={<ArrowBackIcon />}
-          sx={{minWidth: '100px'}}
+          sx={{minWidth: '200px'}}
           onClick={() => navigate ('/admin/dashboard')}
         >
           Обратно към списъка с потребители

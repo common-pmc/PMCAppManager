@@ -173,7 +173,10 @@ const AdminUserDetails = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Име на файла</TableCell>
+                <TableCell>Фирма</TableCell>
+                <TableCell>Отдел</TableCell>
                 <TableCell>Изтеглен на</TableCell>
+                <TableCell>Свали</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -187,7 +190,18 @@ const AdminUserDetails = () => {
               {downloads.map((download) => (
                 <TableRow key={download.id}>
                   <TableCell>{download.filename}</TableCell>
+                  <TableCell>{download.fileCompany?.name || '-'}</TableCell>
+                  <TableCell>{download.fileDepartment?.name || '-'}</TableCell>
                   <TableCell>{new Date(download.downloadedAt).toLocaleString()}</TableCell>
+                  <TableCell>
+                    <IconButton 
+                      color="primary" 
+                      onClick={() => handleDownloadFile(download.fileId, download.filename)}
+                      disabled={!download.fileId}
+                    >
+                      <DownloadIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

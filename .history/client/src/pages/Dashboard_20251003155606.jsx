@@ -94,22 +94,33 @@ const Dashboard = () => {
       </Paper>
 
       <Stack direction="row" spacing={2} sx={{mb: 2}}>
-        {[
-          {label: 'Регистрирай нов потребител', path: '/admin/register'},
-          {label: 'Качи файл', path: '/admin/upload'},
-          {label: 'Списък с файлове', path: '/admin/files'},
-          {label: 'Филтрирай файлове', path: '/admin/filter'},
-        ].map (btn => (
-          <Button
-            key={btn.path}
-            variant="contained"
-            color="primary"
-            sx={{minWidth: 180, whiteSpace: 'normal'}}
-            onClick={() => navigate (btn.path)}
-          >
-            {btn.label}
-          </Button>
-        ))}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate ('/admin/register')}
+        >
+          Регистрирай нов потребител
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate ('/admin/upload')}
+        >
+          Качи файл
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate ('/admin/files')}
+        >
+          Списък с файлове
+        </Button>
+
+        <Button>
+          Филтрирай файлове
+        </Button>
       </Stack>
     </Container>
   );
