@@ -145,7 +145,7 @@ exports.downloadZip = async(req, res) => {
     });
 
     // Маркираме кой е последния свалил файла
-    await file.update({ lastDownloadedBy: user.id });
+    await file.update({ downloadedBy: user.id });
     }
 
     // Завършваме архива

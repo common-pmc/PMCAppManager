@@ -122,7 +122,7 @@ exports.downloadZip = async(req, res) => {
     // Добавяме файловете в архива и записваме логове/история за всеки:
     for (const file of files) {
       const filePath = path.join(__dirname, '..', 'uploads', file.filename);
-      if (!fs.existsSync(filePath)) {
+      if (fs.existsSync(filePath)) {
         // Пропускаме ако няма файл на сървъра
         continue;
     }
@@ -143,19 +143,15 @@ exports.downloadZip = async(req, res) => {
       userAgent: req.headers['user-agent'] || 'Unknown',
       timestamp: new Date()
     });
-
-    // Маркираме кой е последния свалил файла
-    await file.update({ lastDownloadedBy: user.id });
     }
 
     // Завършваме архива
-    // когато archive завърши - response ще се затвори автоматично
     await archive.finalize();
+
+    // Забележка: Не е нужно да изпращаме отделен отговор, тъй като архивът се стриймва директно в response-а.
   
   } catch (error) {
-    console.error('Грешка при сваляне на zip архив: ', error);
-    // Ако не е изпратен отговор, пращаме грешка
-    res.status(500).send({ message: 'Грешка при сваляне на zip архив.' }); 
+    // 
   }
 }
 
@@ -174,7 +170,7 @@ exports.getFilesByCompany = async (req, res) => {
           attributes: ['id', 'departmentName'],
         },
         {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
-      ],    
+      ],
       order: [['createdAt', 'DESC']],
     });
 

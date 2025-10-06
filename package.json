@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/common-pmc/PMCAppManager#readme",
   "dependencies": {
+    "archiver": "^7.0.1",
     "bcryptjs": "^3.0.2",
     "colors": "^1.4.0",
     "cors": "^2.8.5",

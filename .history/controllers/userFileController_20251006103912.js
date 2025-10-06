@@ -10,7 +10,6 @@ const jwt = require ('jsonwebtoken');
 const path = require ('path');
 const fs = require ('fs');
 const archiver = require ('archiver');
-const { time } = require('console');
 
 const SECRET = process.env.JWT_SECRET || 'my_secret_key';
 
@@ -60,8 +59,6 @@ exports.downloadFile = async (req, res) => {
       ipAddress: req.ip ||
         req.headers['x-forwarded-for'] ||
         req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date (),
     });
 
     res.download (filePath, file.filename);
@@ -72,92 +69,6 @@ exports.downloadFile = async (req, res) => {
       .json ({message: 'Неуспешно сваляне на файла. Моля опитайте по-късно.'});
   }
 };
-
-// Сваляне на всички няколко файла едновременно в zip архив
-exports.downloadZip = async(req, res) => {
-  try {
-    const user = req.user;
-    const ids = Array.isArray(req.body.ids) ? req.body.ids.map(id => parseInt(id)) : [];
-
-    if(!user.isActive) {
-      return res.status(403).json({
-        message: 'Вашия акаунт е деактивиран. Нямате право да сваляте файлове.'
-      });
-    }
-
-    if(!ids || ids.length === 0) {
-      return res.status(400).json({message: 'Не са избрани файлове за сваляне.'});
-    }
-
-    // Взимаме само тези файлове, които потребителят има право да сваля (от същата фирма и отдел).
-    const files = await File.findAll({
-      where: {
-        id: ids,
-        companyId: user.companyId,
-        departmentId: user.departmentId
-      }
-    });
-
-    if (files.length === 0) {
-      return res.status(404).json({message: 'Не са намерени файлове за сваляне.'});
-    }
-    
-    // ZIP Headers
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename=files.zip');
-
-    // Създаваме архив
-    const archive = archiver('zip', {
-      zlib: { level: 9 } // Ниво на компресия
-    });
-
-    archive.on('error', err => {
-      console.error('Грешка при създаване на архива: ', err);
-      res.status(500).send({ message: 'Грешка при създаване на архива.' });
-    });
-
-    // Пайпваме архива към response-а
-    archive.pipe(res);
-
-    // Добавяме файловете в архива и записваме логове/история за всеки:
-    for (const file of files) {
-      const filePath = path.join(__dirname, '..', 'uploads', file.filename);
-      if (!fs.existsSync(filePath)) {
-        // Пропускаме ако няма файл на сървъра
-        continue;
-    }
-    // Добавяме файла в архива с оригиналното му име
-    archive.file(filePath, { name: file.filename });
-
-    // Записваме в DownloadHistory и DownloadLog
-    await DownloadHistory.create({
-      userId: user.id,
-      fileId: file.id,
-      downloadedAt: new Date()
-    });
-
-    await DownloadLog.create({
-      userId: user.id,
-      fileId: file.id,
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date()
-    });
-
-    // Маркираме кой е последния свалил файла
-    await file.update({ lastDownloadedBy: user.id });
-    }
-
-    // Завършваме архива
-    // когато archive завърши - response ще се затвори автоматично
-    await archive.finalize();
-  
-  } catch (error) {
-    console.error('Грешка при сваляне на zip архив: ', error);
-    // Ако не е изпратен отговор, пращаме грешка
-    res.status(500).send({ message: 'Грешка при сваляне на zip архив.' }); 
-  }
-}
 
 // потребител да вижда само файловете от неговата фирма
 exports.getFilesByCompany = async (req, res) => {
@@ -174,7 +85,7 @@ exports.getFilesByCompany = async (req, res) => {
           attributes: ['id', 'departmentName'],
         },
         {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
-      ],    
+      ],
       order: [['createdAt', 'DESC']],
     });
 

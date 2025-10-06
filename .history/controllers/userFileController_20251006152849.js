@@ -122,40 +122,14 @@ exports.downloadZip = async(req, res) => {
     // Добавяме файловете в архива и записваме логове/история за всеки:
     for (const file of files) {
       const filePath = path.join(__dirname, '..', 'uploads', file.filename);
-      if (!fs.existsSync(filePath)) {
+      if (fs.existsSync(filePath)) {
         // Пропускаме ако няма файл на сървъра
-        continue;
+        archive.file(filePath, { name: file.filename });
     }
-    // Добавяме файла в архива с оригиналното му име
-    archive.file(filePath, { name: file.filename });
+  }
 
-    // Записваме в DownloadHistory и DownloadLog
-    await DownloadHistory.create({
-      userId: user.id,
-      fileId: file.id,
-      downloadedAt: new Date()
-    });
-
-    await DownloadLog.create({
-      userId: user.id,
-      fileId: file.id,
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date()
-    });
-
-    // Маркираме кой е последния свалил файла
-    await file.update({ lastDownloadedBy: user.id });
-    }
-
-    // Завършваме архива
-    // когато archive завърши - response ще се затвори автоматично
-    await archive.finalize();
-  
   } catch (error) {
-    console.error('Грешка при сваляне на zip архив: ', error);
-    // Ако не е изпратен отговор, пращаме грешка
-    res.status(500).send({ message: 'Грешка при сваляне на zip архив.' }); 
+    // 
   }
 }
 
@@ -174,7 +148,7 @@ exports.getFilesByCompany = async (req, res) => {
           attributes: ['id', 'departmentName'],
         },
         {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
-      ],    
+      ],
       order: [['createdAt', 'DESC']],
     });
 

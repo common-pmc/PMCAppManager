@@ -122,7 +122,7 @@ exports.downloadZip = async(req, res) => {
     // Добавяме файловете в архива и записваме логове/история за всеки:
     for (const file of files) {
       const filePath = path.join(__dirname, '..', 'uploads', file.filename);
-      if (!fs.existsSync(filePath)) {
+      if (fs.existsSync(filePath)) {
         // Пропускаме ако няма файл на сървъра
         continue;
     }
@@ -145,7 +145,7 @@ exports.downloadZip = async(req, res) => {
     });
 
     // Маркираме кой е последния свалил файла
-    await file.update({ lastDownloadedBy: user.id });
+    await file.update({ downloadedBy: user.id });
     }
 
     // Завършваме архива
@@ -153,9 +153,7 @@ exports.downloadZip = async(req, res) => {
     await archive.finalize();
   
   } catch (error) {
-    console.error('Грешка при сваляне на zip архив: ', error);
-    // Ако не е изпратен отговор, пращаме грешка
-    res.status(500).send({ message: 'Грешка при сваляне на zip архив.' }); 
+    // 
   }
 }
 
