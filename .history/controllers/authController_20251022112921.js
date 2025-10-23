@@ -6,6 +6,12 @@ exports.login = async (req, res) => {
   const {email, password} = req.body;
   try {
     const user = await User.findOne ({where: {email}});
+    if (user.isDeleted || !user.isActive) {
+      return res
+        .status (403)
+        .json ({message: 'Потребителят е деактивиран или изтрит'});
+    }
+
     if (!user) {
       return res.status (404).json ({message: 'Невалидни имейл или парола'});
     }
@@ -69,11 +75,19 @@ exports.register = async (req, res) => {
       }
     }
 
+    if (departmentId) {
+      const department = await Department.findByPk (departmentId);
+      if (!department) {
+        return res.status (400).json ({message: 'Отделът не е намерен!'});
+      }
+    }
+
     const hashedPassword = await bcrypt.hash (password, 10);
     const user = await User.create ({
       email,
       password: hashedPassword,
       companyId,
+      departmentId,
       isAdmin,
       isActive,
     });
@@ -83,8 +97,14 @@ exports.register = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        company: user.company,
+        companyId: user.companyId,
+        departmentId: user.departmentId,
         isAdmin: user.isAdmin,
+        department: departmentId
+          ? await Department.findByPk (departmentId, {
+              attributes: ['id', 'departmentName'],
+            })
+          : null,
       },
     });
   } catch (error) {
@@ -92,5 +112,30 @@ exports.register = async (req, res) => {
       message: 'Internal server error',
       error: error.message,
     });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {oldPassword, newPassword} = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res
+        .status (400)
+        .json ({message: 'Моля, попълнете всички полета.'});
+    }
+
+    const user = await User.findByPk (userId);
+    if (!user) {
+      return res.status (404).json ({message: 'Потребителят не е намерен.'});
+    }
+
+    const isMatch = await bcrypt.compare (oldPassword, user.password);
+    if (!isMatch) {
+      return res.status (401).json ({message: 'Старата парола е неправилна.'});
+    }
+  } catch (error) {
+    //
   }
 };

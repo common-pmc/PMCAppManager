@@ -142,10 +142,6 @@ exports.changePassword = async (req, res) => {
 
     res.json ({message: 'Паролата е променена успешно.'});
   } catch (error) {
-    console.error ('Грешка при смяна на паролата:', error);
-    res.status (500).json ({
-      message: 'Възникна грешка при смяна на паролата.',
-      error: error.message,
-    });
+    //
   }
 };

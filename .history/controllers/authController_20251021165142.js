@@ -132,20 +132,7 @@ exports.changePassword = async (req, res) => {
     }
 
     const isMatch = await bcrypt.compare (oldPassword, user.password);
-    if (!isMatch) {
-      return res.status (401).json ({message: 'Грешна стара парола.'});
-    }
-
-    const hashedNewPassword = await bcrypt.hash (newPassword, 10);
-    user.password = hashedNewPassword;
-    await user.save ();
-
-    res.json ({message: 'Паролата е променена успешно.'});
   } catch (error) {
-    console.error ('Грешка при смяна на паролата:', error);
-    res.status (500).json ({
-      message: 'Възникна грешка при смяна на паролата.',
-      error: error.message,
-    });
+    //
   }
 };

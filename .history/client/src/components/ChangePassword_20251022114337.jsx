@@ -1,14 +1,6 @@
-import React, {useState} from 'react';
+import React from 'react';
 import axiosInstance from '../api/axiosInstance';
-import {
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Alert,
-  Snackbar,
-} from '@mui/material';
+import {TextField, Button, Card, CardContent} from '@mui/material';
 
 const ChangePassword = () => {
   return (

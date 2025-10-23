@@ -6,6 +6,12 @@ exports.login = async (req, res) => {
   const {email, password} = req.body;
   try {
     const user = await User.findOne ({where: {email}});
+    if (user.isDeleted || !user.isActive) {
+      return res
+        .status (403)
+        .json ({message: 'Потребителят е деактивиран или изтрит'});
+    }
+
     if (!user) {
       return res.status (404).json ({message: 'Невалидни имейл или парола'});
     }
@@ -74,11 +80,6 @@ exports.register = async (req, res) => {
       if (!department) {
         return res.status (400).json ({message: 'Отделът не е намерен!'});
       }
-      if (companyId && department.companyId !== companyId) {
-        return res.status (400).json ({
-          message: 'Отделът не принадлежи на избраната фирма!',
-        });
-      }
     }
 
     const hashedPassword = await bcrypt.hash (password, 10);
@@ -86,6 +87,7 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       companyId,
+      departmentId,
       isAdmin,
       isActive,
     });
@@ -95,13 +97,54 @@ exports.register = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        company: user.company,
+        companyId: user.companyId,
+        departmentId: user.departmentId,
         isAdmin: user.isAdmin,
+        department: departmentId
+          ? await Department.findByPk (departmentId, {
+              attributes: ['id', 'departmentName'],
+            })
+          : null,
       },
     });
   } catch (error) {
     res.status (500).json ({
       message: 'Internal server error',
+      error: error.message,
+    });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {oldPassword, newPassword} = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res
+        .status (400)
+        .json ({message: 'Моля, попълнете всички полета.'});
+    }
+
+    const user = await User.findByPk (userId);
+    if (!user) {
+      return res.status (404).json ({message: 'Потребителят не е намерен.'});
+    }
+
+    const isMatch = await bcrypt.compare (oldPassword, user.password);
+    if (!isMatch) {
+      return res.status (401).json ({message: 'Грешна стара парола.'});
+    }
+
+    const hashedNewPassword = await bcrypt.hash (newPassword, 10);
+    user.password = hashedNewPassword;
+    await user.save ();
+
+    res.json ({message: 'Паролата е променена успешно.'});
+  } catch (error) {
+    console.error ('Грешка при смяна на паролата:', error);
+    res.status (500).json ({
+      message: 'Възникна грешка при смяна на паролата.',
       error: error.message,
     });
   }

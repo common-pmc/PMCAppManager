@@ -6,13 +6,19 @@ exports.login = async (req, res) => {
   const {email, password} = req.body;
   try {
     const user = await User.findOne ({where: {email}});
+    if (user.isDeleted || !user.isActive) {
+      return res
+        .status (403)
+        .json ({message: 'Потребителят е деактивиран или изтрит'});
+    }
+
     if (!user) {
-      return res.status (404).json ({message: 'Invalid email or password'});
+      return res.status (404).json ({message: 'Невалидни имейл или парола'});
     }
 
     const isMatched = await bcrypt.compare (password, user.password);
     if (!isMatched) {
-      return res.status (401).json ({message: 'Invalid email or password'});
+      return res.status (401).json ({message: 'Невалидни имейл или парола'});
     }
 
     const token = jwt.sign (
@@ -29,7 +35,7 @@ exports.login = async (req, res) => {
     );
 
     res.json ({
-      message: 'Login successful',
+      message: 'Влизането успешно!',
       accessToken: token,
     });
   } catch (error) {
@@ -51,21 +57,28 @@ exports.register = async (req, res) => {
   } = req.body;
 
   if (!req.user || !req.user.isAdmin) {
-    return res
-      .status (403)
-      .json ({message: 'Access denied! Only admin can register users.'});
+    return res.status (403).json ({
+      message: 'Достъпът забранен! Само администратор може да регистрира потребители.',
+    });
   }
 
   try {
     const existingUser = await User.findOne ({where: {email}});
     if (existingUser) {
-      return res.status (400).json ({message: 'User already exists'});
+      return res.status (400).json ({message: 'Потребителят вече съществува!'});
     }
 
     if (companyId) {
       const company = await Company.findByPk (companyId);
       if (!company) {
-        return res.status (400).json ({message: 'Invalid company ID'});
+        return res.status (400).json ({message: 'Фирмата не е намерена!'});
+      }
+    }
+
+    if (departmentId) {
+      const department = await Department.findByPk (departmentId);
+      if (!department) {
+        return res.status (400).json ({message: 'Отделът не е намерен!'});
       }
     }
 
@@ -74,17 +87,24 @@ exports.register = async (req, res) => {
       email,
       password: hashedPassword,
       companyId,
+      departmentId,
       isAdmin,
       isActive,
     });
 
     res.status (201).json ({
-      message: 'User registered successfully',
+      message: 'Потребителят е регистриран успешно!',
       user: {
         id: user.id,
         email: user.email,
-        company: user.company,
+        companyId: user.companyId,
+        departmentId: user.departmentId,
         isAdmin: user.isAdmin,
+        department: departmentId
+          ? await Department.findByPk (departmentId, {
+              attributes: ['id', 'departmentName'],
+            })
+          : null,
       },
     });
   } catch (error) {
@@ -92,5 +112,14 @@ exports.register = async (req, res) => {
       message: 'Internal server error',
       error: error.message,
     });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const {oldPassword, newPassword} = req.body;
+  } catch (error) {
+    //
   }
 };
