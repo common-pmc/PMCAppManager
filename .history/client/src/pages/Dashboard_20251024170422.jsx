@@ -70,18 +70,6 @@ const Dashboard = () => {
           />
         </Tabs>
       </Box>
-
-      <TabPanel value={tab} index={0}>
-        <UsersListTab />
-      </TabPanel>
-
-      <TabPanel value={tab} index={1}>
-        <AdminActionsTab />
-      </TabPanel>
-
-      <TabPanel value={tab} index={2}>
-        <ChangePassword />
-      </TabPanel>
     </Container>
   );
 };

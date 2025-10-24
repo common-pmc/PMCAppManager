@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Box, Tabs, Tab, Container, Typography} from '@mui/material';
 import GroupIcon from '@mui/icons-material/Group';
-import BuildIcon from '@mui/icons-material/Build';
+import BuilderIcon from '@mui/icons-material/Builder';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import UsersListTab from '../components/UsersListTab';
 import AdminActionsTab from '../components/AdminActionsTab';
@@ -54,34 +54,8 @@ const Dashboard = () => {
             {...allyProps (0)}
             label="Потребители"
           />
-
-          <Tab
-            icon={<BuildIcon />}
-            iconPosition="start"
-            {...allyProps (1)}
-            label="Административни действия"
-          />
-
-          <Tab
-            icon={<VpnKeyIcon />}
-            iconPosition="start"
-            {...allyProps (2)}
-            label="Промяна на паролата"
-          />
         </Tabs>
       </Box>
-
-      <TabPanel value={tab} index={0}>
-        <UsersListTab />
-      </TabPanel>
-
-      <TabPanel value={tab} index={1}>
-        <AdminActionsTab />
-      </TabPanel>
-
-      <TabPanel value={tab} index={2}>
-        <ChangePassword />
-      </TabPanel>
     </Container>
   );
 };
