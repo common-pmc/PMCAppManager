@@ -8,8 +8,6 @@ import {
   Typography,
   Alert,
   Snackbar,
-  IconButton,
-  InputAdornment,
 } from '@mui/material';
 import {Visibility, VisibilityOff} from '@mui/icons-material';
 
@@ -17,9 +15,6 @@ const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState ('');
   const [newPassword, setNewPassword] = useState ('');
   const [confirmNewPassword, setConfirmNewPassword] = useState ('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState (false);
-  const [showNewPassword, setShowNewPassword] = useState (false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState (false);
   const [message, setMessage] = useState (null);
   const [error, setError] = useState (null);
 
@@ -65,22 +60,6 @@ const ChangePassword = () => {
           margin='normal'
           value={currentPassword}
           onChange={e => setCurrentPassword (e.target.value)}
-          required
-          slotProps={{
-            input: {
-              type: showCurrentPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => setShowCurrentPassword (!showCurrentPassword)}
-                    edge='end'
-                  >
-                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            }
-          }}
         />
 
         <TextField 
@@ -91,22 +70,6 @@ const ChangePassword = () => {
           margin='normal'
           value={newPassword}
           onChange={e => setNewPassword (e.target.value)}
-          required
-          slotProps={{
-            input: {
-              type: showNewPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => setShowNewPassword (!showNewPassword)}
-                    edge='end'
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            }
-          }}
         />
 
         <TextField 
@@ -117,22 +80,6 @@ const ChangePassword = () => {
           margin='normal'
           value={confirmNewPassword}
           onChange={e => setConfirmNewPassword (e.target.value)}
-          required
-          slotProps={{
-            input: ({
-              type: showConfirmNewPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => setShowConfirmNewPassword (!showConfirmNewPassword)}
-                    edge='end'
-                  >
-                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            })
-          }}
         />
 
         <Button

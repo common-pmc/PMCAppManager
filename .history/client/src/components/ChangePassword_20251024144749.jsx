@@ -69,16 +69,7 @@ const ChangePassword = () => {
           slotProps={{
             input: {
               type: showCurrentPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => setShowCurrentPassword (!showCurrentPassword)}
-                    edge='end'
-                  >
-                    {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
+              endAdornment: ()
             }
           }}
         />
@@ -91,22 +82,6 @@ const ChangePassword = () => {
           margin='normal'
           value={newPassword}
           onChange={e => setNewPassword (e.target.value)}
-          required
-          slotProps={{
-            input: {
-              type: showNewPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => setShowNewPassword (!showNewPassword)}
-                    edge='end'
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            }
-          }}
         />
 
         <TextField 
@@ -117,22 +92,6 @@ const ChangePassword = () => {
           margin='normal'
           value={confirmNewPassword}
           onChange={e => setConfirmNewPassword (e.target.value)}
-          required
-          slotProps={{
-            input: ({
-              type: showConfirmNewPassword ? 'text' : 'password',
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton
-                    onClick={() => setShowConfirmNewPassword (!showConfirmNewPassword)}
-                    edge='end'
-                  >
-                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              )
-            })
-          }}
         />
 
         <Button
