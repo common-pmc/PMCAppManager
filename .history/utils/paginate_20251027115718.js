@@ -1,0 +1,1 @@
+const {Op} = require ('sequelize');
