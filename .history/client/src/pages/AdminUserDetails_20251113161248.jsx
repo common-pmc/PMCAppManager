@@ -127,10 +127,10 @@ const AdminUserDetails = () => {
     fetchNow({ limit, page: params.page, search: params.search });
   };
 
-  const handleSearch = e => {
+  const handleSearchKeyDown = (e) => {
     if (e.key === 'Enter') {
-      const s = e.target.value.trim ();
-      fetchNow ({search: s, page: 1});
+      const s = (params.search || '').trim();
+      fetchNow({ search: s, page: 1 });
     }
   };
 
@@ -219,7 +219,7 @@ const AdminUserDetails = () => {
           placeholder="Търси по име на файл..."
           value={params.search || ''}
           onChange={(e) => setSearch(e.target.value)}
-          onKeyDown={handleSearch} 
+          onKeyDown={handleSearchKeyDown}
         />
       </Stack>
 
@@ -259,7 +259,7 @@ const AdminUserDetails = () => {
       <Stack sx={{ mt: 2 }}>
         <PaginationControls
           meta={{
-            page: Number(params.page) || Number(meta.page) || 1,
+            page: Number(meta.page) || Number(params.page) || 1,
             pageCount: Number(meta.pageCount) || 1,
             pageSize: Number(meta.pageSize) || Number(params.limit) || 10,
             total: Number(meta.total) || 0,

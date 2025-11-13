@@ -1,6 +1,5 @@
 import React, {useState, useEffect, useCallback} from 'react';
 import axiosInstance from '../api/axiosInstance'; 
-import usePaginatedFetch from '../hooks/usePaginatedFetch';
 import {
   Card,
   CardContent,
@@ -14,7 +13,6 @@ import {
   Alert,
   Divider,
   Typography,
-  TextField,
   Stack,
   Box,
   Checkbox,
@@ -22,25 +20,29 @@ import {
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import PaginationControls from './PaginationControls';
 
 const UserFiles = () => {
+  const [files, setFiles] = useState ([]);
+  const [loading, setLoading] = useState (true);
+  const [error, setError] = useState (null);
   const [selectedFiles, setSelectedFiles] = useState ([]);
   const [successMessage, setSuccessMessage] = useState ('');
-  const [localError, setLocalError] = useState (null);
 
-  const {
-    data: files = [],
-    meta = {},
-    loading,
-    error: fetchError,
-    params,
-    setPage,
-    setLimit,
-    setSearch,
-    fetchNow
-  } = usePaginatedFetch('/user', { page: 1, limit: 10, search: '' }, [], { debounceMs: 300, autoFetch: true });
+  const fetchFiles = useCallback (async () => {
+    try {
+      setLoading (true);
+      const response = await axiosInstance.get ('/user');
+      setFiles (response.data);
+    } catch (error) {
+      setError (error.response?.data?.message || 'Грешка при зареждане на файловете.');
+    } finally {
+      setLoading (false);
+    }
+  }, []);
 
+  useEffect(() => {
+    fetchFiles();
+  }, [fetchFiles]);
 
   const handleSelectFile = (fileId) => {
     setSelectedFiles(prev => 
@@ -65,9 +67,9 @@ const UserFiles = () => {
       setSuccessMessage('Файлът е изтеглен успешно.');
 
       // Рефреш на списъка с файлове след изтегляне
-      fetchNow({ page: params.page, limit: params.limit, search: params.search });
+      fetchFiles();
     } catch (error) {
-      setLocalError(error.response?.data?.message || 'Грешка при изтегляне на файла.'); 
+      setError(error.response?.data?.message || 'Грешка при изтегляне на файла.'); 
     }
   };
 
@@ -93,54 +95,24 @@ const UserFiles = () => {
       setSelectedFiles([]);
 
       // Рефреш на списъка с файлове след изтегляне
-      fetchNow({ page: params.page, limit: params.limit, search: params.search });
+      fetchFiles();
     } catch (error) {
-      setLocalError(error.response?.data?.message || 'Грешка при изтегляне на ZIP файл.'); 
+      setError(error.response?.data?.message || 'Грешка при изтегляне на ZIP файл.'); 
     }
   }
 
   const handleCloseSnackbar = () => {
     setSuccessMessage('');
-    setLocalError(null);
+    setError(null);
   }
-
-  const onPageChange = (page) => {
-    setPage(page);
-    fetchNow({ page, limit: params.limit, search: params.search });
-  };
-
-  const onLimitChange = (limit) => {
-    setLimit(limit);
-    fetchNow({ page: params.page, limit, search: params.search });
-  };
-
-  const handleSearchKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      const s = (params.search || '').trim();
-      fetchNow({ search: s, page: 1 });
-    }
-  };
 
   if(loading) return <CircularProgress />;
 
   return (
     <Card>
       <CardContent>
-        {(fetchError || localError) && <Alert severity="error" sx={{ mb: 2 }}>{fetchError || localError}</Alert>}
-        
-        <Stack direction="column" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-          <Typography variant="h5" sx={{mb: 2}}>Файлове за изтегляне</Typography>
-
-          <TextField 
-            size='small'
-            sx={{mb: 3}}
-            placeholder="Търси по име на файл..."
-            variant="outlined"
-            value={params.search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearchKeyDown}
-          />
-        </Stack>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        <Typography variant="h5" sx={{mb: 2}}>Файлове за изтегляне</Typography>
 
         <List>
           {files.length === 0 && <Typography sx={{p: 2}}>Няма налични файлове.</Typography>}
@@ -202,21 +174,8 @@ const UserFiles = () => {
           </Box>
         )}
 
-        <Stack sx={{mt: 2}}>
-          <PaginationControls 
-            meta={{
-              page: Number(params.page) || Number(meta.page) || 1,
-              pageCount: Number(meta.pageCount) || 1,
-              pageSize: Number(meta.pageSize) || Number(params.limit) || 10,
-              total: Number(meta.total) || 0,
-            }}
-            onPageChange={onPageChange}
-            onLimitChange={onLimitChange}
-          />
-        </Stack>
-
         <Snackbar
-          open={!!successMessage || !!fetchError || !!localError}
+          open={!!successMessage || !!error}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           autoHideDuration={3000}
           onClose={handleCloseSnackbar}

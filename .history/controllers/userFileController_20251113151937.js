@@ -192,33 +192,21 @@ exports.getFilesByCompany = async (req, res) => {
       whereClause.departmentId = null;
     }
 
-    const {data: files, meta} = await paginate(File, {
-      page,
-      limit,
-      searchField: 'filename',
-      searchValue: search,
-      where: whereClause,
-      include: [
-        {model: Company, as: 'Company', attributes: ['id', 'companyName']},
-        {
-          model: Department,
-          as: 'Department',
-          attributes: ['id', 'departmentName'],
-        },
-        {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
-      ],
-      order: [['createdAt', 'DESC']],
-      attributes: [
-        'id', 
-        'filename', 
-        'description', 
-        'companyId', 
-        'departmentId', 
-        'createdAt', 
-        'updatedAt'
-      ],
-      maxLimit: 100,
-    });
+    
+
+    // const files = await File.findAll ({
+    //   where: whereClause,
+    //   include: [
+    //     {model: Company, as: 'Company', attributes: ['id', 'companyName']},
+    //     {
+    //       model: Department,
+    //       as: 'Department',
+    //       attributes: ['id', 'departmentName'],
+    //     },
+    //     {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
+    //   ],    
+    //   order: [['createdAt', 'DESC']],
+    // });
 
     const formattedFiles = await Promise.all (
       files.map (async file => {
@@ -246,7 +234,7 @@ exports.getFilesByCompany = async (req, res) => {
       })
     );
 
-    res.json ({ data: formattedFiles, meta });
+    res.json (formattedFiles);
   } catch (error) {
     console.error ('Грешка при зареждане на файловете: ', error);
     res.status (500).json ({

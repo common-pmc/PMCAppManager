@@ -192,11 +192,7 @@ exports.getFilesByCompany = async (req, res) => {
       whereClause.departmentId = null;
     }
 
-    const {data: files, meta} = await paginate(File, {
-      page,
-      limit,
-      searchField: 'filename',
-      searchValue: search,
+    const files = await File.findAll ({
       where: whereClause,
       include: [
         {model: Company, as: 'Company', attributes: ['id', 'companyName']},
@@ -206,18 +202,8 @@ exports.getFilesByCompany = async (req, res) => {
           attributes: ['id', 'departmentName'],
         },
         {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
-      ],
+      ],    
       order: [['createdAt', 'DESC']],
-      attributes: [
-        'id', 
-        'filename', 
-        'description', 
-        'companyId', 
-        'departmentId', 
-        'createdAt', 
-        'updatedAt'
-      ],
-      maxLimit: 100,
     });
 
     const formattedFiles = await Promise.all (
@@ -246,7 +232,7 @@ exports.getFilesByCompany = async (req, res) => {
       })
     );
 
-    res.json ({ data: formattedFiles, meta });
+    res.json (formattedFiles);
   } catch (error) {
     console.error ('Грешка при зареждане на файловете: ', error);
     res.status (500).json ({

@@ -39,8 +39,23 @@ const UserFiles = () => {
     setLimit,
     setSearch,
     fetchNow
-  } = usePaginatedFetch('/user', { page: 1, limit: 10, search: '' }, [], { debounceMs: 300, autoFetch: true });
+  } = usePaginatedFetch('/user', { page: 1, limit: 10, search: '' }, [], { debounceMs: 300}, { autoFetch: true });
 
+  // const fetchFiles = useCallback (async () => {
+  //   try {
+  //     setLoading (true);
+  //     const response = await axiosInstance.get ('/user');
+  //     setFiles (response.data);
+  //   } catch (error) {
+  //     setError (error.response?.data?.message || 'Грешка при зареждане на файловете.');
+  //   } finally {
+  //     setLoading (false);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   fetchFiles();
+  // }, [fetchFiles]);
 
   const handleSelectFile = (fileId) => {
     setSelectedFiles(prev => 
@@ -119,7 +134,6 @@ const UserFiles = () => {
       const s = (params.search || '').trim();
       fetchNow({ search: s, page: 1 });
     }
-  };
 
   if(loading) return <CircularProgress />;
 
@@ -202,21 +216,8 @@ const UserFiles = () => {
           </Box>
         )}
 
-        <Stack sx={{mt: 2}}>
-          <PaginationControls 
-            meta={{
-              page: Number(params.page) || Number(meta.page) || 1,
-              pageCount: Number(meta.pageCount) || 1,
-              pageSize: Number(meta.pageSize) || Number(params.limit) || 10,
-              total: Number(meta.total) || 0,
-            }}
-            onPageChange={onPageChange}
-            onLimitChange={onLimitChange}
-          />
-        </Stack>
-
         <Snackbar
-          open={!!successMessage || !!fetchError || !!localError}
+          open={!!successMessage || !!error}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           autoHideDuration={3000}
           onClose={handleCloseSnackbar}

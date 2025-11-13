@@ -211,14 +211,30 @@ exports.getFilesByCompany = async (req, res) => {
       attributes: [
         'id', 
         'filename', 
+        'originalname', 
         'description', 
         'companyId', 
         'departmentId', 
+        'lastDownloadedBy', 
         'createdAt', 
         'updatedAt'
       ],
       maxLimit: 100,
     });
+
+    // const files = await File.findAll ({
+    //   where: whereClause,
+    //   include: [
+    //     {model: Company, as: 'Company', attributes: ['id', 'companyName']},
+    //     {
+    //       model: Department,
+    //       as: 'Department',
+    //       attributes: ['id', 'departmentName'],
+    //     },
+    //     {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
+    //   ],    
+    //   order: [['createdAt', 'DESC']],
+    // });
 
     const formattedFiles = await Promise.all (
       files.map (async file => {
@@ -246,7 +262,7 @@ exports.getFilesByCompany = async (req, res) => {
       })
     );
 
-    res.json ({ data: formattedFiles, meta });
+    res.json (formattedFiles);
   } catch (error) {
     console.error ('Грешка при зареждане на файловете: ', error);
     res.status (500).json ({

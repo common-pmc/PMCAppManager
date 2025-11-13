@@ -41,6 +41,21 @@ const UserFiles = () => {
     fetchNow
   } = usePaginatedFetch('/user', { page: 1, limit: 10, search: '' }, [], { debounceMs: 300, autoFetch: true });
 
+  // const fetchFiles = useCallback (async () => {
+  //   try {
+  //     setLoading (true);
+  //     const response = await axiosInstance.get ('/user');
+  //     setFiles (response.data);
+  //   } catch (error) {
+  //     setError (error.response?.data?.message || 'Грешка при зареждане на файловете.');
+  //   } finally {
+  //     setLoading (false);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   fetchFiles();
+  // }, [fetchFiles]);
 
   const handleSelectFile = (fileId) => {
     setSelectedFiles(prev => 

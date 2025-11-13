@@ -220,6 +220,20 @@ exports.getFilesByCompany = async (req, res) => {
       maxLimit: 100,
     });
 
+    // const files = await File.findAll ({
+    //   where: whereClause,
+    //   include: [
+    //     {model: Company, as: 'Company', attributes: ['id', 'companyName']},
+    //     {
+    //       model: Department,
+    //       as: 'Department',
+    //       attributes: ['id', 'departmentName'],
+    //     },
+    //     {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
+    //   ],    
+    //   order: [['createdAt', 'DESC']],
+    // });
+
     const formattedFiles = await Promise.all (
       files.map (async file => {
         const lastDownload = await DownloadHistory.findOne ({
