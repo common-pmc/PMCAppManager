@@ -13,6 +13,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DownloadIcon from '@mui/icons-material/Download';
 import PaginationControls from '../components/PaginationControls';
+;
 
 const AdminUserDetails = () => {
   const { id } = useParams();
@@ -38,6 +39,12 @@ const AdminUserDetails = () => {
   } = usePaginatedFetch(`/admin/users/${id}`, { page: 1, limit: 10, search: '' }, [id], {
     debounceMs: 300,
   });
+
+  console.log('[AdminUserDetails] hook downloads: ', downloads);
+  console.log('[AdminUserDetails] hook extra: ', extra);
+  console.log('[AdminUserDetails] hook meta: ', meta);
+
+  useEffect(() => {
 
   // Вземаме user от extra (ако е наличен). Това предотвратява отделен axios.get
   useEffect(() => {

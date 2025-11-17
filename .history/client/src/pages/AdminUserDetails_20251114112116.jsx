@@ -53,17 +53,17 @@ const AdminUserDetails = () => {
     async function loadUserFallback() {
       if (user) return; // има го вече, няма нужда от заявка
       try {
-        const res = await axiosInstance.get(`/admin/users/${id}`, { signal: controller.signal });
+        const res = await axiosInstance.get(`/admin/users/${id}`);
         if (res.data?.user) setUser(res.data.user);
       } catch (err) {
-        // Игнорира отменени заявки и не записва грешка в UI
-        if (err.name === 'CanceledError' || err.name === 'AbortError' || err.code === 'ERR_CANCELED') return;
+        // Игнорираме отменени заявки
+        if (err.name === 'CanceledError' || err.name === 'AbortError') return;
         console.error('fallback user fetch error', err);
       }
     }
     loadUserFallback();
 
-    // Cleanup функция
+    // Cleanup
     return () => { controller.abort(); };
   }, [id, user]);
 
@@ -127,7 +127,7 @@ const AdminUserDetails = () => {
   }
   const handleLimitChange = (limit) => {
     setLimit(limit);
-    fetchNow({ page: params.page, limit, search: params.search });
+    fetchNow({ limit, page: params.page, search: params.search });
   };
 
   const handleSearch = e => {
@@ -218,7 +218,7 @@ const AdminUserDetails = () => {
         <Typography variant="h6" sx={{mb: 4}}>Файлове, които потребителят е изтеглил</Typography>
         <TextField
           size="small"
-          sx={{ mb: 3, radius: 15}}
+          sx={{ mb: 3}}
           placeholder="Търси по име на файл..."
           value={params.search || ''}
           onChange={(e) => setSearch(e.target.value)}

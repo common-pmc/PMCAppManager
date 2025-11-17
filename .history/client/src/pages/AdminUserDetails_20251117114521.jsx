@@ -39,6 +39,10 @@ const AdminUserDetails = () => {
     debounceMs: 300,
   });
 
+  console.log('[AdminUserDetails] hook downloads: ', downloads);
+  console.log('[AdminUserDetails] hook extra: ', extra);
+  console.log('[AdminUserDetails] filenames: ', downloads?.map(d => d.filename).join(', '));
+
   // Вземаме user от extra (ако е наличен). Това предотвратява отделен axios.get
   useEffect(() => {
     if (extra && extra.user) {

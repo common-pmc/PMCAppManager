@@ -80,6 +80,8 @@ exports.getUserDetails = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
+    // Debug logs: логваме plain обектите
+
     // 3) Форматиране на записите за фронтенда
     const downloads = history.map (entry => {
       const file = entry.File || {};

@@ -55,12 +55,6 @@ exports.getUserDetails = async (req, res) => {
           model: File,
           as: 'File',
           attributes: ['id', 'filename', 'createdAt'],
-          where: search
-            ? where (fn ('LOWER', col ('File.filename')), {
-                [Op.like]: `%${String (search).toLowerCase ()}%`,
-              })
-            : undefined,
-          required: !!search,
           include: [
             {
               model: Company,
@@ -78,6 +72,15 @@ exports.getUserDetails = async (req, res) => {
         },
       ],
       order: [['createdAt', 'DESC']],
+      searchField: null,
+      searchValue: search,
+      // buildWhere дава възможност да търсим по полета от include (пример: File.filename) - case
+      buildWhere: (_searchField, searchValue) => {
+        if (!searchValue) return;
+        return where (fn ('LOWER', col ('File.filename')), {
+          [Op.like]: `%${String (searchValue).toLowerCase ()}%`,
+        });
+      },
     });
 
     // 3) Форматиране на записите за фронтенда

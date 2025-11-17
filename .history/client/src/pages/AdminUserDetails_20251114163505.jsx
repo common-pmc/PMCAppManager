@@ -127,7 +127,7 @@ const AdminUserDetails = () => {
   }
   const handleLimitChange = (limit) => {
     setLimit(limit);
-    fetchNow({ page: params.page, limit, search: params.search });
+    fetchNow({ limit, page: params.page, search: params.search });
   };
 
   const handleSearch = e => {

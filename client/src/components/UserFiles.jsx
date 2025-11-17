@@ -133,7 +133,7 @@ const UserFiles = () => {
 
           <TextField 
             size='small'
-            sx={{mb: 3}}
+            sx={{mb: 3, radius: 15}}
             placeholder="Търси по име на файл..."
             variant="outlined"
             value={params.search}

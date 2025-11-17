@@ -50,23 +50,17 @@ export default function usePaginatedFetch(endpoint, initialParams = {}, deps = [
 
         const responseData = res.data || {};
         const payload = responseData.data || responseData.files || responseData.downloads || [];
-        const payloadMeta = responseData.meta || responseData.pagination || {};
+        const payloadMeta = responseData.meta || responseData.pagination || responseData.meta || {};
 
         setData(payload);
         setMeta(prev => ({ ...prev, ...payloadMeta }));
         setExtra(responseData);
         prevKeyRef.current = key;
       } catch (err) {
-        if (
-            err.name !== 'CanceledError' || 
-            err.name !== 'AbortError' || 
-            err.code !== 'ERR_CANCELED' ||
-            err.message !== 'canceled'
-          ) {
-          return;
+        if (err.name !== 'CanceledError' && err.message !== 'canceled') {
+          const msg = err.response?.data?.message || err.message || 'Грешка при зареждане';
+          setError(msg);
         }
-        const msg = err.response?.data?.message || err.message || 'Грешка при зареждане на данни.';
-        setError(msg);
       } finally {
         setLoading(false);
       }
@@ -154,7 +148,7 @@ export default function usePaginatedFetch(endpoint, initialParams = {}, deps = [
       return newParams;
     });
 
-    prevKeyRef.current = null;
+    prevKeyRef.current = newKey;
     doFetch(override);
   };
 

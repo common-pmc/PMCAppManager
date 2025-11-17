@@ -1,4 +1,4 @@
-const {Op, fn, col, where} = require ('sequelize');
+const {Op} = require ('sequelize');
 const {
   File,
   User,
@@ -55,29 +55,29 @@ exports.getUserDetails = async (req, res) => {
           model: File,
           as: 'File',
           attributes: ['id', 'filename', 'createdAt'],
-          where: search
-            ? where (fn ('LOWER', col ('File.filename')), {
-                [Op.like]: `%${String (search).toLowerCase ()}%`,
-              })
-            : undefined,
-          required: !!search,
+          required: false,
           include: [
-            {
-              model: Company,
-              as: 'Company',
-              attributes: ['id', 'companyName'],
-              required: false,
-            },
+            {model: Company, as: 'Company', attributes: ['id', 'companyName']},
             {
               model: Department,
               as: 'Department',
               attributes: ['id', 'departmentName'],
-              required: false,
             },
           ],
         },
       ],
       order: [['createdAt', 'DESC']],
+      searchField: 'File.filename',
+      searchValue: search,
+      // buildWhere дава възможност да търсим по полета от include (пример: File.filename)
+      buildWhere: (searchField, searchValue) => {
+        if (searchField) {
+          return {
+            '$File.filename$': {[Op.like]: `%${searchValue}%`},
+          };
+        }
+        return {}; // Ако няма съвпадение, връщаме празен обект
+      },
     });
 
     // 3) Форматиране на записите за фронтенда
@@ -87,11 +87,11 @@ exports.getUserDetails = async (req, res) => {
         id: entry.id,
         fileId: file.id || null,
         filename: file.filename || null,
-        Company: file.Company
-          ? {id: file.Company.id, name: file.Company.companyName}
+        Company: user.Company
+          ? {id: user.Company.id, name: user.Company.companyName}
           : null,
-        Department: file.Department
-          ? {id: file.Department.id, name: file.Department.departmentName}
+        Department: user.Department
+          ? {id: user.Department.id, name: user.Department.departmentName}
           : null,
         downloadedAt: entry.createdAt,
       };

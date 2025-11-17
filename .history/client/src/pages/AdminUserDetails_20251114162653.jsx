@@ -127,7 +127,7 @@ const AdminUserDetails = () => {
   }
   const handleLimitChange = (limit) => {
     setLimit(limit);
-    fetchNow({ page: params.page, limit, search: params.search });
+    fetchNow({ limit, page: params.page, search: params.search });
   };
 
   const handleSearch = e => {
@@ -218,7 +218,7 @@ const AdminUserDetails = () => {
         <Typography variant="h6" sx={{mb: 4}}>Файлове, които потребителят е изтеглил</Typography>
         <TextField
           size="small"
-          sx={{ mb: 3, radius: 15}}
+          sx={{ mb: 3, radius: 10}}
           placeholder="Търси по име на файл..."
           value={params.search || ''}
           onChange={(e) => setSearch(e.target.value)}

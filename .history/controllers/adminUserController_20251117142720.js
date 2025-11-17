@@ -80,6 +80,20 @@ exports.getUserDetails = async (req, res) => {
       order: [['createdAt', 'DESC']],
     });
 
+    // Debug: логваме plain обектите, за да видим точно полетата (без Sequelize инстанции)
+    try {
+      console.log (
+        'DEBUG: paginate history plain:',
+        history.map (
+          h => (typeof h.get === 'function' ? h.get ({plain: true}) : h)
+        )
+      );
+      console.log ('DEBUG: paginate meta:', meta);
+    } catch (err) {
+      console.log ('DEBUG: paginate raw history:', history);
+      console.error ('DEBUG: paginate log error', err);
+    }
+
     // 3) Форматиране на записите за фронтенда
     const downloads = history.map (entry => {
       const file = entry.File || {};

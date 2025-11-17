@@ -1,4 +1,4 @@
-const {Op, fn, col, where} = require ('sequelize');
+const {Op} = require ('sequelize');
 const {
   File,
   User,
@@ -49,6 +49,7 @@ exports.getUserDetails = async (req, res) => {
     const {data: history, meta} = await paginate (DownloadHistory, {
       page,
       limit,
+      searchField: File.filename,
       where: {userId: user.id},
       include: [
         {
@@ -56,29 +57,38 @@ exports.getUserDetails = async (req, res) => {
           as: 'File',
           attributes: ['id', 'filename', 'createdAt'],
           where: search
-            ? where (fn ('LOWER', col ('File.filename')), {
-                [Op.like]: `%${String (search).toLowerCase ()}%`,
-              })
+            ? {
+                filename: {[Op.like]: `%${search}%`},
+              }
             : undefined,
-          required: !!search,
-          include: [
-            {
-              model: Company,
-              as: 'Company',
-              attributes: ['id', 'companyName'],
-              required: false,
-            },
-            {
-              model: Department,
-              as: 'Department',
-              attributes: ['id', 'departmentName'],
-              required: false,
-            },
-          ],
+          required: false,
         },
       ],
       order: [['createdAt', 'DESC']],
+      // buildWhere дава възможност да търсим по полета от include (пример: File.filename)
+      buildWhere: (searchField, searchValue) => {
+        if (searchField === 'filename') {
+          return {
+            '$File.filename$': {[Op.like]: `%${searchValue}%`},
+          };
+        }
+        return {}; // Ако няма съвпадение, връщаме празен обект
+      },
+      searchField: 'filename',
+      searchValue: search,
     });
+
+    // const history = await DownloadHistory.findAll ({
+    //   where: {userId: req.params.id},
+    //   include: [
+    //     {
+    //       model: File,
+    //       as: 'File',
+    //       attributes: ['id', 'filename', 'createdAt'],
+    //     },
+    //   ],
+    //   order: [['createdAt', 'DESC']],
+    // });
 
     // 3) Форматиране на записите за фронтенда
     const downloads = history.map (entry => {
@@ -87,11 +97,11 @@ exports.getUserDetails = async (req, res) => {
         id: entry.id,
         fileId: file.id || null,
         filename: file.filename || null,
-        Company: file.Company
-          ? {id: file.Company.id, name: file.Company.companyName}
+        fileCompany: user.Company
+          ? {id: user.Company.id, name: user.Company.companyName}
           : null,
-        Department: file.Department
-          ? {id: file.Department.id, name: file.Department.departmentName}
+        fileDepartment: user.Department
+          ? {id: user.Department.id, name: user.Department.departmentName}
           : null,
         downloadedAt: entry.createdAt,
       };

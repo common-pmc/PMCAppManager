@@ -60,7 +60,6 @@ exports.getUserDetails = async (req, res) => {
                 [Op.like]: `%${String (search).toLowerCase ()}%`,
               })
             : undefined,
-          required: !!search,
           include: [
             {
               model: Company,
