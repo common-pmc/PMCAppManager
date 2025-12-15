@@ -42,7 +42,7 @@ const Dashboard = () => {
 
   return (
     <Container maxWidth="lg" sx={{py: 4}}>
-      <Typography variant="h4" gutterBottom sx={{fontWeight: 700, mb: 4}}>
+      <Typography variant="h3" gutterBottom sx={{fontWeight: 700, mb: 4}}>
         Администраторски панел
       </Typography>
 

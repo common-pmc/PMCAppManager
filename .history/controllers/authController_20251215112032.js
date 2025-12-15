@@ -44,6 +44,11 @@ exports.login = async (req, res) => {
         isAdmin: user.isAdmin,
         companyId: user.companyId,
         departmentId: user.departmentId,
+        department: user.departmentId
+          ? await Department.findByPk (user.departmentId, {
+              attributes: ['id', 'departmentName'],
+            })
+          : null,
       },
     });
   } catch (error) {

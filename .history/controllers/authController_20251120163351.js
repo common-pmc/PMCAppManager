@@ -6,7 +6,6 @@ exports.login = async (req, res) => {
   const {email, password} = req.body;
   try {
     const user = await User.findOne ({where: {email}});
-
     if (user.isDeleted || !user.isActive) {
       return res
         .status (403)
@@ -38,13 +37,6 @@ exports.login = async (req, res) => {
     res.json ({
       message: 'Влизането успешно!',
       accessToken: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        companyId: user.companyId,
-        departmentId: user.departmentId,
-      },
     });
   } catch (error) {
     res.status (500).json ({
@@ -157,3 +149,5 @@ exports.changePassword = async (req, res) => {
     });
   }
 };
+
+exports.logout = async (req, res) => {};

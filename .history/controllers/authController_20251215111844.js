@@ -38,13 +38,6 @@ exports.login = async (req, res) => {
     res.json ({
       message: 'Влизането успешно!',
       accessToken: token,
-      user: {
-        id: user.id,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        companyId: user.companyId,
-        departmentId: user.departmentId,
-      },
     });
   } catch (error) {
     res.status (500).json ({

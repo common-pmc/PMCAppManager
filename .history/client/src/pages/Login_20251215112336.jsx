@@ -38,7 +38,6 @@ const Login = () => {
       const token = res.data.accessToken;
       const user = res.data.user;
       localStorage.setItem ('token', token); // Store token in localStorage
-      localStorage.setItem ('user', JSON.stringify (user)); // Store user info in localStorage
 
       const payload = jwtDecode (token);
       console.log ('Влизането е успешно: Token:', token, 'Payload:', payload);

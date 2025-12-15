@@ -214,7 +214,6 @@ const AdminUserDetails = () => {
         </Stack>
       </Paper>
 
-
       <Stack direction="column" justifyContent="space-between" alignItems="center" mb={1}>
         <Typography variant="h6" sx={{mb: 4}}>Файлове, които потребителят е изтеглил</Typography>
         <TextField
@@ -224,6 +223,11 @@ const AdminUserDetails = () => {
           value={params.search || ''}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={handleSearch} 
+        />
+
+        <TextField 
+          size='small'
+          sx={{mb: 3, radius: 15}}
         />
       </Stack>
 
