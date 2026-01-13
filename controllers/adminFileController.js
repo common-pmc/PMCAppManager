@@ -67,18 +67,45 @@ exports.getAllFiles = async (req, res) => {
     const page = parseInt (req.query.page) || 1;
     const limit = parseInt (req.query.limit) || 10;
     const search = req.query.search || '';
-    console.log ('[getAllFiles] incoming query:', {page, limit, search});
+    const startDate = req.query.startDate || '';
+    const endDate = req.query.endDate || '';
+    console.log ('[getAllFiles] incoming query:', {page, limit, search, startDate, endDate});
+
+    // buildWhere adds additional where clauses (e.g., date range filtering)
+    const buildWhere = (searchField, searchValue) => {
+      const built = {};
+
+      // date filters: inclusive
+      if (startDate || endDate) {
+        built.createdAt = {};
+        if (startDate) {
+          const s = new Date (startDate);
+          s.setHours (0, 0, 0, 0);
+          built.createdAt[Op.gte] = s;
+        }
+        if (endDate) {
+          const e = new Date (endDate);
+          e.setHours (23, 59, 59, 999);
+          built.createdAt[Op.lte] = e;
+        }
+      }
+
+      // no other custom filters yet
+      return built;
+    };
 
     const {data, meta} = await paginate (File, {
       page,
       limit,
-      searchField: 'filename',
-      searchValue: search,
       include: [
         {
           model: Company,
           as: 'Company',
           attributes: ['id', 'companyName'],
+          where: search
+            ? where(fn('lower', col('companyName')), {[Op.like]: `%${search.toLowerCase()}%`})
+            : undefined,
+          required: !!search,
         },
         {
           model: Department,
@@ -90,6 +117,7 @@ exports.getAllFiles = async (req, res) => {
       ],
       order: [['createdAt', 'DESC']],
       maxLimit: 100,
+      buildWhere,
     });
 
     const formattedFiles = data.map (file => ({

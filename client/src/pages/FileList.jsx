@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import {useNavigate} from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance'; 
 import usePaginatedFetch from '../hooks/usePaginatedFetch';
@@ -26,6 +26,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import PaginationControls from '../components/PaginationControls';
 
 const FileList = () => {
+  
   const navigate = useNavigate ();
 
   const {
@@ -49,6 +50,7 @@ const FileList = () => {
 
   const handleLimitChange = limit => {
     setLimit (limit);
+    setPage (1);
     fetchNow ({limit, page: 1, search: params.search});
   }
 
@@ -77,7 +79,7 @@ const FileList = () => {
   const handleClearSearch = () => {
     setSearch ('');
     setPage (1);
-    fetchNow ({search: '', page: 1, limit: params.limit});
+    fetchNow ({search: '', page: 1, limit: params.limit, startDate: params.startDate || '', endDate: params.endDate || ''});
   }
 
   return (
@@ -134,8 +136,54 @@ const FileList = () => {
                       },
                     }}
           value={params.search || ''}
-          onChange={e => setSearch (e.target.value)}
+          onChange={e => {
+            setSearch (e.target.value)
+            setPage (1);
+          }}
         />
+
+        <Stack direction='row' spacing={2} justifyContent='center' sx={{mb: 3}}>
+          <TextField
+            label='От дата'
+            type='date'
+            size='small'
+            slotProps={{
+              inputLabel: { shrink: true }
+            }}
+            value={params.startDate || ''}
+            onChange={e => {
+              const v = e.target.value || '';
+              setPage(1);
+              fetchNow({ startDate: v, endDate: params.endDate || '', page: 1, limit: params.limit, search: params.search });
+            }}
+          />
+
+          <TextField
+            label='До дата'
+            type='date'
+            size='small'
+            slotProps={{
+              inputLabel: { shrink: true }
+            }}
+            value={params.endDate || ''}
+            onChange={e => {
+              const v = e.target.value || '';
+              setPage(1);
+              fetchNow({ endDate: v, startDate: params.startDate || '', page: 1, limit: params.limit, search: params.search });
+            }}
+          />
+
+          <Button
+            variant='outlined'
+            size='small'
+            onClick={() => {
+              setPage(1);
+              fetchNow({ startDate: '', endDate: '', page: 1, limit: params.limit, search: params.search });
+            }}
+          >
+            Изчисти дати
+          </Button>
+        </Stack>
       </Stack>
 
       {files.length === 0
