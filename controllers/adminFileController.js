@@ -13,29 +13,75 @@ exports.uploadFile = async (req, res) => {
         .json ({message: 'Само администратори имат право да качват файлове.'});
     }
 
-    const {companyId, departmentId, description} = req.body;
+    const {companyId, departmentId, description, productType} = req.body;
+
+    const company = await Company.findByPk (companyId);
+    if (!company) {
+      return res
+        .status (400)
+        .json ({message: 'Моля изберете фирма.'});
+    }
+
+    let department = null;
+
+    if(departmentId) {
+      department = await Department.findOne({
+        where: {id: departmentId, companyId}
+      })
+    }
+
+    if(!department) {
+      return res
+        .status (400)
+        .json ({message: 'Невалиден отдел за избраната фирма.'});
+    }
+
+    if(!['software', 'firmware', 'documentation'].includes(productType)) {
+      return res.status (400).json ({message: 'Невалиден тип продукт.'});
+    }
 
     if (!companyId) {
       return res.status (400).json ({message: 'Моля изберете фирма.'});
     }
 
-    if (!req.file) {
-      return res
-        .status (400)
-        .json ({message: 'Моля изберете файл за качване.'});
+    if(!req.file) {
+      return res.status (400).json ({message: 'Моля изберете файл за качване.'});
     }
 
     const extension = path.extname (req.file.filename).replace ('.', '');
 
+    const safeCompanyName = company.companyName
+      .toLowerCase ()
+      .replace (/\s+/g, '_');
+    const safeDepartmentName = department 
+    ? department.departmentName
+      .toLowerCase ()
+      .replace (/\s+/g, '_') 
+    : null;
+    const fileName = req.file.originalname.toLowerCase ().replace (/\s+/g, '_');
+
+    const relativePath = department
+      ? path.join ('uploads', safeCompanyName, safeDepartmentName, productType, fileName)
+      : path.join ('uploads', safeCompanyName, productType, fileName);
+
+    const absolutePath = path.join (__dirname, '..', relativePath);
+
+    // Създаваме директориите, ако не съществуват
+    fs.mkdirSync (path.dirname (absolutePath), {recursive: true});
+
+    // Преместваме файла в новата директория
+    fs.renameSync (req.file.path, absolutePath);
+
     const file = await File.create ({
       filename: req.file.filename,
       originalname: req.file.originalname,
-      path: path.join ('uploads', req.file.filename),
+      path: relativePath,
       extension,
       userId: req.user.id,
       description: req.body.description || null,
       companyId: Number (companyId),
       departmentId: departmentId ? Number (departmentId) : null,
+      productType,
     });
 
     const fileUrl = `${req.protocol}://${req.get ('host')}/uploads/${req.file.filename}`;
@@ -51,12 +97,16 @@ exports.uploadFile = async (req, res) => {
         description: file.description,
         companyId: file.companyId,
         departmentId: file.departmentId,
+        productType,
         uploadedBy: req.user.id,
         createdAt: file.createdAt,
         updatedAt: file.updatedAt,
       },
     });
   } catch (error) {
+    if(error.name === 'SequelizeUniqueConstraintError') {
+      return res.status (400).json ({message: 'Вече съществува файл със същото име в избраната фирма и отдел.'});
+    }
     console.error ('Грешка при качване:', error);
     res.status (500).json ({message: 'Грешка при качване на файла.'});
   }
@@ -174,7 +224,7 @@ exports.downloadFile = async (req, res) => {
       return res.status (404).json ({message: 'Файлът не е намерен.'});
     }
 
-    const filePath = path.join (__dirname, '..', 'uploads', file.filename);
+    const filePath = path.join (__dirname, '..', file.path);
 
     if (!fs.existsSync (filePath)) {
       return res

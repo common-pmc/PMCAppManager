@@ -44,6 +44,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      productType: {
+        type: DataTypes.ENUM('software', 'firmware', 'documentation'),
+        allowNull: false,
+        defaultValue: 'software'
+      },
     },
     {
       sequelize,
