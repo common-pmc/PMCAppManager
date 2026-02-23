@@ -4,6 +4,7 @@ const fs = require ('fs');
 const {Op, fn, col, where} = require ('sequelize');
 const mime = require ('mime-types');
 const paginate = require ('../utils/paginate');
+const productTypes = require ('../constants/productTypes');
 
 exports.uploadFile = async (req, res) => {
   try {
@@ -36,7 +37,9 @@ exports.uploadFile = async (req, res) => {
         .json ({message: 'Невалиден отдел за избраната фирма.'});
     }
 
-    if(!['software', 'firmware', 'documentation'].includes(productType)) {
+    const allowedTypes = productTypes.map(type => type.value);
+
+    if(!allowedTypes.includes(productType)) {
       return res.status (400).json ({message: 'Невалиден тип продукт.'});
     }
 

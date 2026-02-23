@@ -1,25 +1,23 @@
-import React from 'react';
-import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoutes';
-import Layout from './components/Layout';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Unauthorized from './pages/Unauthorized';
-import UploadPage from './pages/Upload';
-import FileList from './pages/FileList';
-import AddCompany from './pages/AddCompany';
-import AdminUserDetails from './pages/AdminUserDetails';
-import UserDashboard from './pages/UserDashboard';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoutes";
+import Layout from "./components/Layout";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import UploadPage from "./pages/Upload";
+import FileList from "./pages/FileList";
+import AddCompany from "./pages/AddCompany";
+import AdminUserDetails from "./pages/AdminUserDetails";
+import UserDashboard from "./pages/UserDashboard";
 
-import './App.css';
+import "./App.css";
 
-function App () {
+function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/unauthorized" element={<Unauthorized />} />
 
         <Route element={<Layout />}>
           <Route
@@ -79,7 +77,6 @@ function App () {
             }
           />
         </Route>
-
       </Routes>
     </Router>
   );

@@ -7,6 +7,7 @@ const db = require ('./database/models');
 const authRoutes = require ('./routes/authRoutes');
 const userRoutes = require ('./routes/userRoutes');
 const adminFileRoutes = require ('./routes/adminFileRoutes');
+const productTypeRoutes = require ('./routes/productTypeRoutes');
 const userFileRoutes = require ('./routes/userFileRoutes');
 const logRoutes = require ('./routes/logRoutes');
 const companyRoutes = require ('./routes/companyRoutes');
@@ -65,6 +66,7 @@ app.use ('/api/user', userFileRoutes);
 app.use ('/api/logs', logRoutes);
 app.use ('/api/companies', companyRoutes);
 app.use ('/api/admin/users', adminUserRoutes);
+app.use ('/api/product-types', productTypeRoutes);
 
 db.sequelize
   .authenticate ()
