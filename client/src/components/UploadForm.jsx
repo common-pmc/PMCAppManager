@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import {
@@ -14,6 +14,7 @@ import {
   Typography,
   LinearProgress,
   InputAdornment,
+  Autocomplete,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
@@ -23,8 +24,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import CategoryIcon from "@mui/icons-material/Category";
 
 const UploadForm = () => {
-  const [file, setFile] = useState(null);
-  const [filename, setFilename] = useState("");
+  const [files, setFiles] = useState([]);
   const [description, setDescription] = useState("");
   const [companies, setCompanies] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -32,10 +32,15 @@ const UploadForm = () => {
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [productTypes, setProductTypes] = useState([]);
   const [selectedProductType, setSelectedProductType] = useState("");
+  const [productNames, setProductNames] = useState([]);
+  const [productName, setProductName] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [uploadedFileUrl, setUploadedFileUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadController, setUploadController] = useState(null);
   const [progress, setProgress] = useState(0);
+
+  const productNameDebounceRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -58,6 +63,48 @@ const UploadForm = () => {
     fetchData();
   }, []);
 
+  const fetchProductNames = async (query = "") => {
+    if (!selectedCompany) {
+      setProductNames([]);
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams({ companyId: selectedCompany });
+      if (selectedDepartment) {
+        params.append("departmentId", selectedDepartment);
+      }
+      if (query) {
+        params.append("q", query);
+      }
+
+      const res = await axiosInstance.get(
+        `/admin/files/products?${params.toString()}`,
+      );
+      const names = Array.isArray(res.data.data)
+        ? res.data.data.map((item) => item.productName || item)
+        : [];
+      setProductNames(names);
+    } catch (error) {
+      console.error("Грешка при зареждане на имената на продуктите:", error);
+      setProductNames([]);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedCompany) {
+      fetchProductNames();
+    } else {
+      setProductNames([]);
+    }
+
+    return () => {
+      if (productNameDebounceRef.current) {
+        clearTimeout(productNameDebounceRef.current);
+      }
+    };
+  }, [selectedCompany, selectedDepartment]);
+
   const handleCompanyChange = async (e) => {
     const companyId = e.target.value;
     setSelectedCompany(companyId);
@@ -69,8 +116,49 @@ const UploadForm = () => {
   };
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setFilename(e.target.files[0].name);
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(selectedFiles);
+  };
+
+  const uploadFiles = async (formData) => {
+    const controller = new AbortController();
+    setUploadController(controller);
+
+    setUploading(true);
+
+    try {
+      const response = await axiosInstance.post(
+        "/admin/files/upload",
+        formData,
+        {
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total,
+            );
+            setProgress(percentCompleted);
+          },
+        },
+      );
+
+      return response;
+    } finally {
+      setUploading(false);
+      setUploadController(null);
+    }
+  };
+
+  const cancelUpload = () => {
+    if (uploadController) {
+      uploadController.abort();
+      setUploading(false);
+      setProgress(0);
+      setMessage("Качването беше отменено.");
+      setError("");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -79,38 +167,32 @@ const UploadForm = () => {
     setError("");
     setProgress(0);
 
-    if (!file || !filename || !selectedCompany) {
+    if (
+      !files.length ||
+      !selectedCompany ||
+      !selectedProductType ||
+      !productName
+    ) {
       setError("Моля, попълнете всички задължителни полета.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("filename", filename);
+
+    files.forEach((file) => formData.append("files", file));
     formData.append("description", description);
     formData.append("companyId", selectedCompany);
     if (selectedDepartment) {
       formData.append("departmentId", selectedDepartment);
     }
     formData.append("productType", selectedProductType);
+    formData.append("productName", productName);
 
     try {
-      const res = await axiosInstance.post("/admin/files/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total,
-          );
-          setProgress(percentCompleted);
-        },
-      });
+      const res = await uploadFiles(formData);
 
       setMessage("Файлът е качен успешно.");
-      setUploadedFileUrl(res.data.file.url);
-      setFile(null);
-      setFilename("");
+      setFiles([]);
       setDescription("");
       setSelectedCompany("");
       setSelectedDepartment("");
@@ -157,7 +239,7 @@ const UploadForm = () => {
         }}
       >
         <Typography variant="h6" component="h2" sx={{ mb: 4 }} gutterBottom>
-          Избор на файл за качване
+          Избор на файлове за качване
         </Typography>
 
         <Button
@@ -167,54 +249,69 @@ const UploadForm = () => {
           fullWidth
           sx={{ mb: 2 }}
         >
-          Избери файл
-          <input type="file" onChange={handleFileChange} hidden required />
+          Избери файлове за качване
+          <input
+            type="file"
+            onChange={handleFileChange}
+            hidden
+            required
+            multiple
+          />
         </Button>
-        {file && (
-          <Typography variant="body2" color="textSecondary" gutterBottom>
-            Избран файл: {file.name}
-          </Typography>
+
+        {files.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Typography>Избрани файлове ({files.length}):</Typography>
+
+            {files.map((file, index) => (
+              <Typography key={index} variant="body2">
+                {file.name}
+              </Typography>
+            ))}
+          </Box>
         )}
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel id="company-label">
-            <BusinessIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-            Избери фирма
-          </InputLabel>
-          <Select
-            labelId="company-label"
-            value={selectedCompany}
-            onChange={handleCompanyChange}
-            variant="standard"
-            required
-          >
-            {companies.map((company) => (
-              <MenuItem key={company.id} value={company.id}>
-                {company.companyName}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Autocomplete
+          options={companies}
+          getOptionLabel={(option) => option.companyName}
+          value={companies.find((c) => c.id === selectedCompany) || null}
+          onChange={(event, newValue) => {
+            const companyId = newValue ? newValue.id : "";
+            setSelectedCompany(companyId);
+            setSelectedDepartment("");
+            const company = companies.find((c) => c.id === parseInt(companyId));
+            setDepartments(company ? company.Departments : []);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Избери фирма"
+              variant="standard"
+              fullWidth
+              required
+            />
+          )}
+        />
 
         {departments.length > 0 && (
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="department-label">
-              <ApartmentIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-              Избери отдел
-            </InputLabel>
-            <Select
-              labelId="department-label"
-              value={selectedDepartment}
-              onChange={(e) => setSelectedDepartment(e.target.value)}
-              variant="standard"
-            >
-              {departments.map((department) => (
-                <MenuItem key={department.id} value={department.id}>
-                  {department.departmentName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <Autocomplete
+            options={departments}
+            getOptionLabel={(option) => option.departmentName}
+            value={departments.find((d) => d.id === selectedDepartment) || null}
+            onChange={(event, newValue) => {
+              const departmentId = newValue ? newValue.id : "";
+              setSelectedDepartment(departmentId);
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Избери отдел"
+                variant="standard"
+                fullWidth
+                required
+              />
+            )}
+          />
         )}
 
         <FormControl fullWidth sx={{ mb: 2 }}>
@@ -237,25 +334,37 @@ const UploadForm = () => {
           </Select>
         </FormControl>
 
-        {/* <FormControl>
-          <InputLabel id="product-type-label">
-            <CategoryIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-            Избери тип на файла
-          </InputLabel>
-          <Select
-            labelId="product-type-label"
-            value={selectedProductType}
-            onChange={(e) => setSelectedProductType(e.target.value)}
-            variant="standard"
-            required
-          >
-            {productTypes.map((type) => (
-              <MenuItem key={type.value} value={type.value}>
-                {type.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
+        <Autocomplete
+          freeSolo
+          options={productNames}
+          inputValue={productName}
+          onInputChange={(event, newInputValue) => {
+            setProductName(newInputValue);
+
+            if (!selectedCompany) {
+              setProductNames([]);
+              return;
+            }
+
+            if (productNameDebounceRef.current) {
+              clearTimeout(productNameDebounceRef.current);
+            }
+
+            productNameDebounceRef.current = setTimeout(() => {
+              fetchProductNames(newInputValue);
+            }, 300);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Избери или въведи име на продукт"
+              variant="standard"
+              fullWidth
+              required
+              sx={{ mb: 2 }}
+            />
+          )}
+        />
 
         <TextField
           placeholder="Описание (по избор)"
@@ -277,11 +386,23 @@ const UploadForm = () => {
           }}
         />
 
-        {progress > 0 && (
+        {uploading && (
           <Box sx={{ mb: 2 }}>
             <LinearProgress variant="determinate" value={progress} />
             <Typography variant="caption">{progress}%</Typography>
           </Box>
+        )}
+
+        {uploading && (
+          <Button
+            variant="outlined"
+            color="error"
+            fullWidth
+            onClick={cancelUpload}
+            sx={{ mb: 2 }}
+          >
+            Отмени качването
+          </Button>
         )}
 
         <Button
@@ -289,10 +410,11 @@ const UploadForm = () => {
           variant="contained"
           color="primary"
           fullWidth
+          disabled={uploading}
           startIcon={<UploadFileIcon />}
           sx={{ mb: 2 }}
         >
-          Качи файл
+          {uploading ? "Качване..." : "Качи файл"}
         </Button>
 
         {message && (

@@ -11,7 +11,6 @@ module.exports = (sequelize, DataTypes) => {
     static associate (models) {
       // define association here
       Department.belongsTo (models.Company, {foreignKey: 'companyId'});
-      Department.belongsTo (models.User, {foreignKey: 'userId'});
       Department.hasMany (models.User, {foreignKey: 'departmentId'});
       Department.hasMany (models.File, {
         foreignKey: 'departmentId',

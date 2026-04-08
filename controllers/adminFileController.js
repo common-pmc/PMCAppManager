@@ -14,9 +14,14 @@ exports.uploadFile = async (req, res) => {
         .json ({message: 'Само администратори имат право да качват файлове.'});
     }
 
-    const {companyId, departmentId, description, productType} = req.body;
+    const {companyId, departmentId, description, productType, productName} = req.body;
+
+    if(!productName) {
+      return res.status (400).json ({message: 'Моля въведете име на продукта.'});
+    }
 
     const company = await Company.findByPk (companyId);
+
     if (!company) {
       return res
         .status (400)
@@ -31,7 +36,7 @@ exports.uploadFile = async (req, res) => {
       })
     }
 
-    if(!department) {
+    if(departmentId && !department) {
       return res
         .status (400)
         .json ({message: 'Невалиден отдел за избраната фирма.'});
@@ -47,64 +52,68 @@ exports.uploadFile = async (req, res) => {
       return res.status (400).json ({message: 'Моля изберете фирма.'});
     }
 
-    if(!req.file) {
-      return res.status (400).json ({message: 'Моля изберете файл за качване.'});
+    if(!req.files || req.files.length === 0) {
+      return res.status (400).json ({message: 'Моля изберете файлове за качване.'});
     }
 
-    const extension = path.extname (req.file.filename).replace ('.', '');
+    const uploadedFiles = [];
 
-    const safeCompanyName = company.companyName
-      .toLowerCase ()
-      .replace (/\s+/g, '_');
-    const safeDepartmentName = department 
-    ? department.departmentName
-      .toLowerCase ()
-      .replace (/\s+/g, '_') 
-    : null;
-    const fileName = req.file.originalname.toLowerCase ().replace (/\s+/g, '_');
+    for (const file of req.files) {
+      const extension = path.extname (file.filename).replace ('.', '');
 
-    const relativePath = department
-      ? path.join ('uploads', safeCompanyName, safeDepartmentName, productType, fileName)
-      : path.join ('uploads', safeCompanyName, productType, fileName);
+      const sanitize = name => name.toLowerCase ().replace (/\s+/g, '_');
 
-    const absolutePath = path.join (__dirname, '..', relativePath);
+      const safeCompany = sanitize (company.companyName);
+      const safeDepartment = department ? sanitize (department.departmentName) : null;
+      const safeProductName = sanitize (productName);
 
-    // Създаваме директориите, ако не съществуват
-    fs.mkdirSync (path.dirname (absolutePath), {recursive: true});
+      const safeFileName = file.filename.trim().toLowerCase().replace (/\s+/g, '_');
 
-    // Преместваме файла в новата директория
-    fs.renameSync (req.file.path, absolutePath);
+      const relativePath = department
+        ? path.join(
+          'uploads',
+          safeCompany,
+          safeDepartment,
+          safeProductName,
+          productType,
+          safeFileName
+        )
+        : path.join(
+          'uploads',
+          safeCompany,
+          safeProductName,
+          productType,
+          safeFileName
+        );
 
-    const file = await File.create ({
-      filename: req.file.filename,
-      originalname: req.file.originalname,
-      path: relativePath,
-      extension,
-      userId: req.user.id,
-      description: req.body.description || null,
-      companyId: Number (companyId),
-      departmentId: departmentId ? Number (departmentId) : null,
-      productType,
-    });
+      const absolutePath = path.join (__dirname, '..', relativePath);
 
-    const fileUrl = `${req.protocol}://${req.get ('host')}/uploads/${req.file.filename}`;
-    res.status (201).json ({
-      message: 'Файлът е качен успешно.',
-      file: {
-        id: file.id,
+      // Създаваме директориите, ако не съществуват
+      fs.mkdirSync (path.dirname (absolutePath), {recursive: true});
+
+      // Преместваме файла в новата директория
+      fs.renameSync (file.path, absolutePath);
+
+      const savedFile = await File.create ({
         filename: file.filename,
         originalname: file.originalname,
-        url: fileUrl,
-        path: file.path,
-        extension: file.extension,
-        description: file.description,
-        companyId: file.companyId,
-        departmentId: file.departmentId,
+        path: relativePath,
+        extension,
+        url: `${req.protocol}://${req.get('host')}/${relativePath.replace(/\\/g, '/')}`,
+        userId: req.user.id,
+        description: req.body.description || null,
+        companyId: Number (companyId),
+        departmentId: departmentId ? Number (departmentId) : null,
         productType,
-        uploadedBy: req.user.id,
-        createdAt: file.createdAt,
-        updatedAt: file.updatedAt,
-      },
+        productName
+      });
+
+      uploadedFiles.push (savedFile);
+    }
+
+    res.status (201).json ({
+      message: 'Файловете са качени успешно.',
+      files: uploadedFiles
     });
   } catch (error) {
     if(error.name === 'SequelizeUniqueConstraintError') {
@@ -112,6 +121,43 @@ exports.uploadFile = async (req, res) => {
     }
     console.error ('Грешка при качване:', error);
     res.status (500).json ({message: 'Грешка при качване на файла.'});
+  }
+};
+
+exports.getProductNames = async (req, res) => {
+  const {companyId, departmentId, q} = req.query;
+
+  if (!companyId) {
+    return res.status (400).json ({message: 'Моля изберете фирма.'});
+  }
+
+  try {
+    const whereClause = {
+      companyId: Number (companyId),
+    };
+
+    if (departmentId) {
+      whereClause.departmentId = Number (departmentId);
+    }
+
+    if (q) {
+      whereClause[Op.and] = [
+        where(fn('LOWER', col('productName')), {
+          [Op.like]: `%${q.toString().toLowerCase()}%`,
+        }),
+      ];
+    }
+
+    const productNames = await File.findAll ({
+      where: whereClause,
+      attributes: ['productName'],
+      group: ['productName'],
+    });
+
+    res.status (200).json ({data: productNames});
+  } catch (error) {
+    console.error ('Грешка при извличане на имената на продуктите:', error);
+    res.status (500).json ({message: 'Грешка при извличане на имената на продуктите.'});
   }
 };
 
@@ -177,7 +223,7 @@ exports.getAllFiles = async (req, res) => {
       id: file.id,
       filename: file.filename,
       originalname: file.originalname || file.filename,
-      url: `${req.protocol}://${req.get ('host')}/uploads/${file.filename}`,
+      url: `${req.protocol}://${req.get('host')}/${file.path.replace(/\\/g,'/')}`,
       description: file.description,
       company: file.Company
         ? {id: file.Company.id, companyName: file.Company.companyName}

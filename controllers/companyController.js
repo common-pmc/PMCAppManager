@@ -8,6 +8,7 @@ exports.listCompanies = async (req, res) => {
         {
           model: Department,
           attributes: ['id', 'departmentName'],
+          separate: true,
         },
       ],
       order: [['companyName', 'ASC']],
