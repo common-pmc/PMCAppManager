@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../api/axiosInstance";
+import axiosInstance from "../../api/axiosInstance";
 import {
   Box,
   Button,
@@ -16,10 +16,10 @@ import {
   InputAdornment,
   Autocomplete,
 } from "@mui/material";
+import FileUploader from "./FileUploader";
+import CompanySelect from "./CompanySelect";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import BusinessIcon from "@mui/icons-material/Business";
-import ApartmentIcon from "@mui/icons-material/Apartment";
 import DescriptionIcon from "@mui/icons-material/Description";
 import CategoryIcon from "@mui/icons-material/Category";
 
@@ -103,6 +103,7 @@ const UploadForm = () => {
         clearTimeout(productNameDebounceRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompany, selectedDepartment]);
 
   const handleCompanyChange = async (e) => {
@@ -113,11 +114,6 @@ const UploadForm = () => {
     // Зареждане на отделите за избраната фирма
     const company = companies.find((c) => c.id === parseInt(companyId));
     setDepartments(company ? company.Departments : []);
-  };
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setFiles(selectedFiles);
   };
 
   const uploadFiles = async (formData) => {
@@ -135,7 +131,7 @@ const UploadForm = () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-          onUploadProress: (progressEvent) => {
+          onUploadProgress: (progressEvent) => {
             const percentCompleted = Math.round(
               (progressEvent.loaded * 100) / progressEvent.total,
             );
@@ -189,7 +185,7 @@ const UploadForm = () => {
     formData.append("productName", productName);
 
     try {
-      const res = await uploadFiles(formData);
+      await uploadFiles(formData);
 
       setMessage("Файлът е качен успешно.");
       setFiles([]);
@@ -242,77 +238,18 @@ const UploadForm = () => {
           Избор на файлове за качване
         </Typography>
 
-        <Button
-          variant="contained"
-          component="label"
-          startIcon={<UploadFileIcon />}
-          fullWidth
-          sx={{ mb: 2 }}
-        >
-          Избери файлове за качване
-          <input
-            type="file"
-            onChange={handleFileChange}
-            hidden
-            required
-            multiple
-          />
-        </Button>
+        <FileUploader files={files} setFiles={setFiles} />
 
-        {files.length > 0 && (
-          <Box sx={{ mb: 2 }}>
-            <Typography>Избрани файлове ({files.length}):</Typography>
-
-            {files.map((file, index) => (
-              <Typography key={index} variant="body2">
-                {file.name}
-              </Typography>
-            ))}
-          </Box>
-        )}
-
-        <Autocomplete
-          options={companies}
-          getOptionLabel={(option) => option.companyName}
-          value={companies.find((c) => c.id === selectedCompany) || null}
-          onChange={(event, newValue) => {
-            const companyId = newValue ? newValue.id : "";
-            setSelectedCompany(companyId);
-            setSelectedDepartment("");
-            const company = companies.find((c) => c.id === parseInt(companyId));
-            setDepartments(company ? company.Departments : []);
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Избери фирма"
-              variant="standard"
-              fullWidth
-              required
-            />
-          )}
+        <CompanySelect
+          companies={companies}
+          departments={departments}
+          selectedCompany={selectedCompany}
+          setSelectedCompany={setSelectedCompany}
+          selectedDepartment={selectedDepartment}
+          setSelectedDepartment={setSelectedDepartment}
+          setDepartments={setDepartments}
+          onCompanyChange={handleCompanyChange}
         />
-
-        {departments.length > 0 && (
-          <Autocomplete
-            options={departments}
-            getOptionLabel={(option) => option.departmentName}
-            value={departments.find((d) => d.id === selectedDepartment) || null}
-            onChange={(event, newValue) => {
-              const departmentId = newValue ? newValue.id : "";
-              setSelectedDepartment(departmentId);
-            }}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Избери отдел"
-                variant="standard"
-                fullWidth
-                required
-              />
-            )}
-          />
-        )}
 
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="product-type-label">
