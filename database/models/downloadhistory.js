@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       DownloadHistory.belongsTo (models.User, {
         foreignKey: 'userId',
+        as: 'User',
       });
       DownloadHistory.belongsTo (models.File, {
         foreignKey: 'fileId',

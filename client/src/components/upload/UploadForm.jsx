@@ -85,7 +85,10 @@ const UploadForm = () => {
 
     files.forEach((file) => formData.append("files", file));
     formData.append("companyId", selectedCompany);
-    formData.append("departmentId", selectedDepartment || "");
+    if (selectedDepartment) {
+      formData.append("departmentId", selectedDepartment);
+    }
+    // formData.append("departmentId", selectedDepartment || "");
     formData.append("productType", selectedProductType);
     formData.append("productName", productName);
     formData.append("description", description);

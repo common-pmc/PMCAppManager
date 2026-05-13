@@ -36,12 +36,14 @@ exports.downloadFile = async (req, res) => {
     // проверка дали файлът принадлежи на същата фирма като потребителя
     if (
       file.companyId !== user.companyId ||
-      file.departmentId !== user.departmentId
+      (user.departmentId !== null && file.departmentId !== user.departmentId)
     ) {
       return res.status (403).json ({message: 'Нямате достъп до този файл.'});
     }
 
-    const filePath = path.join (__dirname, '..', 'uploads', file.filename);
+    const filePath = file.path
+      ? path.join (__dirname, '..', file.path)
+      : path.join (__dirname, '..', 'uploads', file.filename);
 
     if (!fs.existsSync (filePath)) {
       return res
@@ -94,6 +96,8 @@ exports.downloadZip = async(req, res) => {
     const user = req.user;
     const ids = Array.isArray(req.body.ids) ? req.body.ids.map(id => parseInt(id)) : [];
 
+    console.log("ZIP REQUEST BODY:", req.body);
+
     if(!user.isActive) {
       return res.status(403).json({
         message: 'Вашия акаунт е деактивиран. Нямате право да сваляте файлове.'
@@ -105,12 +109,17 @@ exports.downloadZip = async(req, res) => {
     }
 
     // Взимаме само тези файлове, които потребителят има право да сваля (от същата фирма и отдел).
+    const whereClause = {
+      id: ids,
+      companyId: user.companyId,
+    };
+
+    if (user.departmentId !== null) {
+      whereClause.departmentId = user.departmentId;
+    }
+
     const files = await File.findAll({
-      where: {
-        id: ids,
-        companyId: user.companyId,
-        departmentId: user.departmentId
-      }
+      where: whereClause
     });
 
     if (files.length === 0) {
@@ -136,13 +145,15 @@ exports.downloadZip = async(req, res) => {
 
     // Добавяме файловете в архива и записваме логове/история за всеки:
     for (const file of files) {
-      const filePath = path.join(__dirname, '..', 'uploads', file.filename);
+      const filePath = file.path
+        ? path.join(__dirname, '..', file.path)
+        : path.join(__dirname, '..', 'uploads', file.filename);
       if (!fs.existsSync(filePath)) {
         // Пропускаме ако няма файл на сървъра
         continue;
-    }
-    // Добавяме файла в архива с оригиналното му име
-    archive.file(filePath, { name: file.filename });
+      }
+      // Добавяме файла в архива с оригиналното му име
+      archive.file(filePath, { name: file.filename });
 
     // Записваме в DownloadHistory и DownloadLog
     await DownloadHistory.create({
@@ -177,7 +188,7 @@ exports.downloadZip = async(req, res) => {
 // потребител да вижда само файловете от неговата фирма
 exports.getFilesByCompany = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user; 
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -187,13 +198,11 @@ exports.getFilesByCompany = async (req, res) => {
       companyId: user.companyId,
     };
 
-    if (user.departmentId) {
+    if (user.departmentId !== null) {
       // Потребителят има отдел → вижда само файлове за своя отдел
       whereClause.departmentId = user.departmentId;
-    } else {
-      // Потребителят няма отдел → вижда файлове с departmentId null
-      whereClause.departmentId = null;
     }
+    // Ако няма отдел, вижда всички файлове за фирмата
 
     const {data: files, meta} = await paginate(File, {
       page,
