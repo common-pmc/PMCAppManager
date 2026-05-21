@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import axiosInstance from "../api/axiosInstance";
 import usePaginatedFetch from "../hooks/usePaginatedFetch";
 import {
@@ -198,11 +198,90 @@ const UserFiles = () => {
           {files.length === 0 && (
             <Typography sx={{ p: 2 }}>Няма налични файлове.</Typography>
           )}
+
+          {files.length > 0 && (
+            <ListItem sx={{ py: 1, px: 0 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "48px 3fr 3fr 3fr 140px",
+                  width: "100%",
+                  alignItems: "center",
+                  gap: 2,
+                }}
+              >
+                <Typography variant="caption" color="text.secondary">
+                  Избор
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Файл
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Описание
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Последно изтеглен от
+                </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ textAlign: "right" }}
+                >
+                  Действие
+                </Typography>
+              </Box>
+            </ListItem>
+          )}
+
           {files.map((file) => (
             <React.Fragment key={file.id}>
-              <ListItem
-                secondaryAction={
-                  <Stack direction="row" spacing={1}>
+              <ListItem sx={{ py: 1, px: 0 }}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: "48px 3fr 3fr 3fr 140px",
+                    width: "100%",
+                    alignItems: "center",
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Checkbox
+                      edge="start"
+                      checked={selectedFiles.includes(file.id)}
+                      onChange={() => handleSelectFile(file.id)}
+                    />
+                  </Box>
+
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Avatar sx={{ width: 32, height: 32 }}>
+                      <AssignmentIcon />
+                    </Avatar>
+                    <Typography variant="body1" fontWeight={500}>
+                      {file.filename}
+                    </Typography>
+                  </Box>
+
+                  <Typography variant="body2" color="text.secondary">
+                    {file.description ? file.description : "Няма описание"}
+                  </Typography>
+
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {file.lastDownloadedBy
+                        ? `Последно изтеглен от ${file.lastDownloadedBy}`
+                        : "Все още не е изтеглян"}
+                    </Typography>
+                    {file.lastDownloadedBy && (
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(
+                          file.lastDownloadedAt || file.updatedAt,
+                        ).toLocaleString()}
+                      </Typography>
+                    )}
+                  </Box>
+
+                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                     <Button
                       variant="contained"
                       startIcon={<DownloadIcon />}
@@ -210,39 +289,8 @@ const UserFiles = () => {
                     >
                       Свали
                     </Button>
-                  </Stack>
-                }
-              >
-                <ListItemAvatar>
-                  <Checkbox
-                    edge="start"
-                    checked={selectedFiles.includes(file.id)}
-                    onChange={() => handleSelectFile(file.id)}
-                  />
-                </ListItemAvatar>
-                <ListItemAvatar>
-                  <Avatar>
-                    <AssignmentIcon />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={file.name}
-                  secondary={
-                    <React.Fragment>
-                      <Box component="span">
-                        {file.description ? file.description : "Няма описание"}
-                      </Box>
-                      <Box
-                        component="span"
-                        sx={{ color: "text.secondary", fontSize: 12, ml: 2 }}
-                      >
-                        {file.lastDownloadedBy
-                          ? `Последно изтеглен от ${file.lastDownloadedBy} на ${new Date(file.lastDownloadedAt || file.updatedAt).toLocaleString()}`
-                          : "Все още не е изтеглян"}
-                      </Box>
-                    </React.Fragment>
-                  }
-                />
+                  </Box>
+                </Box>
               </ListItem>
               <Divider component="li" />
             </React.Fragment>

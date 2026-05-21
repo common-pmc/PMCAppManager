@@ -1,174 +1,200 @@
-const {File, User, Company, Department, DownloadHistory, DownloadLog} = require ('../database/models');
-const path = require ('path');
-const fs = require ('fs');
-const {Op, fn, col, where} = require ('sequelize');
-const mime = require ('mime-types');
-const paginate = require ('../utils/paginate');
-const productTypes = require ('../constants/productTypes');
+const {
+  File,
+  User,
+  Company,
+  Department,
+  DownloadHistory,
+  DownloadLog,
+} = require("../database/models");
+const path = require("path");
+const fs = require("fs");
+const { Op, fn, col, where } = require("sequelize");
+const mime = require("mime-types");
+const paginate = require("../utils/paginate");
+const productTypes = require("../constants/productTypes");
 
 exports.uploadFile = async (req, res) => {
   try {
     if (!req.user.isAdmin) {
       return res
-        .status (403)
-        .json ({message: 'Само администратори имат право да качват файлове.'});
+        .status(403)
+        .json({ message: "Само администратори имат право да качват файлове." });
     }
 
-    const {companyId, departmentId, description, productType, productName} = req.body;
+    const { companyId, departmentId, description, productType, productName } =
+      req.body;
 
-    if(!productName) {
-      return res.status (400).json ({message: 'Моля въведете име на продукта.'});
+    if (!productName) {
+      return res
+        .status(400)
+        .json({ message: "Моля въведете име на продукта." });
     }
 
-    const company = await Company.findByPk (companyId);
+    const company = await Company.findByPk(companyId);
 
     if (!company) {
-      return res
-        .status (400)
-        .json ({message: 'Моля изберете фирма.'});
+      return res.status(400).json({ message: "Моля изберете фирма." });
     }
 
     let department = null;
 
-    if(departmentId) {
+    if (departmentId) {
       department = await Department.findOne({
-        where: {id: departmentId, companyId}
-      })
+        where: { id: departmentId, companyId },
+      });
     }
 
-    if(departmentId && !department) {
+    if (departmentId && !department) {
       return res
-        .status (400)
-        .json ({message: 'Невалиден отдел за избраната фирма.'});
+        .status(400)
+        .json({ message: "Невалиден отдел за избраната фирма." });
     }
 
-    const allowedTypes = productTypes.map(type => type.value);
+    const allowedTypes = productTypes.map((type) => type.value);
 
-    if(!allowedTypes.includes(productType)) {
-      return res.status (400).json ({message: 'Невалиден тип продукт.'});
+    if (!allowedTypes.includes(productType)) {
+      return res.status(400).json({ message: "Невалиден тип продукт." });
     }
 
     if (!companyId) {
-      return res.status (400).json ({message: 'Моля изберете фирма.'});
+      return res.status(400).json({ message: "Моля изберете фирма." });
     }
 
-    if(!req.files || req.files.length === 0) {
-      return res.status (400).json ({message: 'Моля изберете файлове за качване.'});
+    if (!req.files || req.files.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Моля изберете файлове за качване." });
     }
 
     const uploadedFiles = [];
 
     for (const file of req.files) {
-      const extension = path.extname (file.filename).replace ('.', '');
+      const extension = path.extname(file.filename).replace(".", "");
 
-      const sanitize = name => name.toLowerCase ().replace (/\s+/g, '_');
+      const sanitize = (name) => name.toLowerCase().replace(/\s+/g, "_");
 
-      const safeCompany = sanitize (company.companyName);
-      const safeDepartment = department ? sanitize (department.departmentName) : null;
-      const safeProductName = sanitize (productName);
+      const safeCompany = sanitize(company.companyName);
+      const safeDepartment = department
+        ? sanitize(department.departmentName)
+        : null;
+      const safeProductName = sanitize(productName);
 
-      const safeFileName = file.filename.trim().toLowerCase().replace (/\s+/g, '_');
+      const safeFileName = file.filename
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_");
 
       const relativePath = department
         ? path.join(
-          'uploads',
-          safeCompany,
-          safeDepartment,
-          safeProductName,
-          productType,
-          safeFileName
-        )
+            "uploads",
+            safeCompany,
+            safeDepartment,
+            safeProductName,
+            productType,
+            safeFileName,
+          )
         : path.join(
-          'uploads',
-          safeCompany,
-          safeProductName,
-          productType,
-          safeFileName
-        );
+            "uploads",
+            safeCompany,
+            safeProductName,
+            productType,
+            safeFileName,
+          );
 
-      const absolutePath = path.join (__dirname, '..', relativePath);
+      const absolutePath = path.join(__dirname, "..", relativePath);
 
       // Създаваме директориите, ако не съществуват
-      fs.mkdirSync (path.dirname (absolutePath), {recursive: true});
+      fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
 
       // Преместваме файла в новата директория
-      fs.renameSync (file.path, absolutePath);
+      fs.renameSync(file.path, absolutePath);
 
-      const savedFile = await File.create ({
+      const savedFile = await File.create({
         filename: file.filename,
         originalname: file.originalname,
         path: relativePath,
         extension,
-        url: `${req.protocol}://${req.get('host')}/${relativePath.replace(/\\/g, '/')}`,
+        url: `${req.protocol}://${req.get("host")}/${relativePath.replace(/\\/g, "/")}`,
         userId: req.user.id,
         description: req.body.description || null,
-        companyId: Number (companyId),
-        departmentId: departmentId ? Number (departmentId) : null,
+        companyId: Number(companyId),
+        departmentId: departmentId ? Number(departmentId) : null,
         productType,
-        productName
+        productName,
       });
 
-      uploadedFiles.push (savedFile);
+      uploadedFiles.push(savedFile);
     }
 
-    res.status (201).json ({
-      message: 'Файловете са качени успешно.',
-      files: uploadedFiles
+    res.status(201).json({
+      message: "Файловете са качени успешно.",
+      files: uploadedFiles,
     });
   } catch (error) {
-    if(error.name === 'SequelizeUniqueConstraintError') {
-      return res.status (400).json ({message: 'Вече съществува файл със същото име в избраната фирма и отдел.'});
+    if (error.name === "SequelizeUniqueConstraintError") {
+      return res.status(400).json({
+        message:
+          "Вече съществува файл със същото име в избраната фирма и отдел.",
+      });
     }
-    console.error ('Грешка при качване:', error);
-    res.status (500).json ({message: 'Грешка при качване на файла.'});
+    console.error("Грешка при качване:", error);
+    res.status(500).json({ message: "Грешка при качване на файла." });
   }
 };
 
 exports.getProductNames = async (req, res) => {
-  const {companyId, departmentId, q} = req.query;
+  const { companyId, departmentId, q } = req.query;
 
   if (!companyId) {
-    return res.status (400).json ({message: 'Моля изберете фирма.'});
+    return res.status(400).json({ message: "Моля изберете фирма." });
   }
 
   try {
     const whereClause = {
-      companyId: Number (companyId),
+      companyId: Number(companyId),
     };
 
     if (departmentId) {
-      whereClause.departmentId = Number (departmentId);
+      whereClause.departmentId = Number(departmentId);
     }
 
     if (q) {
       whereClause[Op.and] = [
-        where(fn('LOWER', col('productName')), {
+        where(fn("LOWER", col("productName")), {
           [Op.like]: `%${q.toString().toLowerCase()}%`,
         }),
       ];
     }
 
-    const productNames = await File.findAll ({
+    const productNames = await File.findAll({
       where: whereClause,
-      attributes: ['productName'],
-      group: ['productName'],
+      attributes: ["productName"],
+      group: ["productName"],
     });
 
-    res.status (200).json ({data: productNames});
+    res.status(200).json({ data: productNames });
   } catch (error) {
-    console.error ('Грешка при извличане на имената на продуктите:', error);
-    res.status (500).json ({message: 'Грешка при извличане на имената на продуктите.'});
+    console.error("Грешка при извличане на имената на продуктите:", error);
+    res
+      .status(500)
+      .json({ message: "Грешка при извличане на имената на продуктите." });
   }
 };
 
 exports.getAllFiles = async (req, res) => {
   try {
-    const page = parseInt (req.query.page) || 1;
-    const limit = parseInt (req.query.limit) || 10;
-    const search = req.query.search || '';
-    const startDate = req.query.startDate || '';
-    const endDate = req.query.endDate || '';
-    console.log ('[getAllFiles] incoming query:', {page, limit, search, startDate, endDate});
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
+    const startDate = req.query.startDate || "";
+    const endDate = req.query.endDate || "";
+    console.log("[getAllFiles] incoming query:", {
+      page,
+      limit,
+      search,
+      startDate,
+      endDate,
+    });
 
     // buildWhere adds additional where clauses (e.g., date range filtering)
     const buildWhere = (searchField, searchValue) => {
@@ -178,13 +204,13 @@ exports.getAllFiles = async (req, res) => {
       if (startDate || endDate) {
         built.createdAt = {};
         if (startDate) {
-          const s = new Date (startDate);
-          s.setHours (0, 0, 0, 0);
+          const s = new Date(startDate);
+          s.setHours(0, 0, 0, 0);
           built.createdAt[Op.gte] = s;
         }
         if (endDate) {
-          const e = new Date (endDate);
-          e.setHours (23, 59, 59, 999);
+          const e = new Date(endDate);
+          e.setHours(23, 59, 59, 999);
           built.createdAt[Op.lte] = e;
         }
       }
@@ -193,40 +219,42 @@ exports.getAllFiles = async (req, res) => {
       return built;
     };
 
-    const {data, meta} = await paginate (File, {
+    const { data, meta } = await paginate(File, {
       page,
       limit,
       include: [
         {
           model: Company,
-          as: 'Company',
-          attributes: ['id', 'companyName'],
+          as: "Company",
+          attributes: ["id", "companyName"],
           where: search
-            ? where(fn('lower', col('companyName')), {[Op.like]: `%${search.toLowerCase()}%`})
+            ? where(fn("lower", col("companyName")), {
+                [Op.like]: `%${search.toLowerCase()}%`,
+              })
             : undefined,
           required: !!search,
         },
         {
           model: Department,
-          as: 'Department',
-          attributes: ['id', 'departmentName'],
+          as: "Department",
+          attributes: ["id", "departmentName"],
         },
-        {model: User, as: 'owner', attributes: ['id', 'email']},
-        {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
+        { model: User, as: "owner", attributes: ["id", "email"] },
+        { model: User, as: "lastDownloader", attributes: ["id", "email"] },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       maxLimit: 100,
       buildWhere,
     });
 
-    const formattedFiles = data.map (file => ({
+    const formattedFiles = data.map((file) => ({
       id: file.id,
       filename: file.filename,
       originalname: file.originalname || file.filename,
-      url: `${req.protocol}://${req.get('host')}/${file.path.replace(/\\/g,'/')}`,
+      url: `${req.protocol}://${req.get("host")}/${file.path.replace(/\\/g, "/")}`,
       description: file.description,
       company: file.Company
-        ? {id: file.Company.id, companyName: file.Company.companyName}
+        ? { id: file.Company.id, companyName: file.Company.companyName }
         : null,
       department: file.Department
         ? {
@@ -246,14 +274,16 @@ exports.getAllFiles = async (req, res) => {
             email: file.lastDownloader.email,
           }
         : null,
+      productType: file.productType,
+      productName: file.productName,
       createdAt: file.createdAt,
       updatedAt: file.updatedAt,
     }));
 
-    res.status (200).json ({data: formattedFiles, meta});
+    res.status(200).json({ data: formattedFiles, meta });
   } catch (error) {
-    console.error ('Грешка при извличане на файловете:', error);
-    res.status (500).json ({message: 'Грешка при извличане на файловете.'});
+    console.error("Грешка при извличане на файловете:", error);
+    res.status(500).json({ message: "Грешка при извличане на файловете." });
   }
 };
 
@@ -264,58 +294,59 @@ exports.downloadFile = async (req, res) => {
 
     if (!user.isAdmin) {
       return res
-        .status (403)
-        .json ({message: 'Само администратори имат право да свалят файлове.'});
+        .status(403)
+        .json({ message: "Само администратори имат право да свалят файлове." });
     }
 
-    const file = await File.findByPk (fileId);
+    const file = await File.findByPk(fileId);
     if (!file) {
-      return res.status (404).json ({message: 'Файлът не е намерен.'});
+      return res.status(404).json({ message: "Файлът не е намерен." });
     }
 
-    const filePath = path.join (__dirname, '..', file.path);
+    const filePath = path.join(__dirname, "..", file.path);
 
-    if (!fs.existsSync (filePath)) {
+    if (!fs.existsSync(filePath)) {
       return res
-        .status (404)
-        .json ({message: 'Файлът не е намерен на сървъра.'});
+        .status(404)
+        .json({ message: "Файлът не е намерен на сървъра." });
     }
 
     // Определя MIME типа
-    const mimeType = mime.lookup (filePath) || 'application/octet-stream';
-    res.setHeader ('Content-Type', mimeType);
-    res.setHeader (
-      'Content-Disposition',
-      `attachment; filename="${file.originalname}"`
+    const mimeType = mime.lookup(filePath) || "application/octet-stream";
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${file.originalname}"`,
     );
 
     // Записваме в DownloadHistory и DownloadLog
-    await DownloadHistory.create ({
+    await DownloadHistory.create({
       userId: user.id,
       fileId: file.id,
-      downloadedAt: new Date (),
+      downloadedAt: new Date(),
     });
 
-    await DownloadLog.create ({
+    await DownloadLog.create({
       userId: user.id,
       fileId: file.id,
-      ipAddress: req.ip ||
-        req.headers['x-forwarded-for'] ||
+      ipAddress:
+        req.ip ||
+        req.headers["x-forwarded-for"] ||
         req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date (),
+      userAgent: req.headers["user-agent"] || "Unknown",
+      timestamp: new Date(),
     });
 
     // Обновяваме downloadedBy поле с id на потребителя
-    await file.update ({downloadedBy: user.id});
+    await file.update({ downloadedBy: user.id });
 
-    res.download (filePath, file.originalname, err => {
+    res.download(filePath, file.originalname, (err) => {
       if (err) {
-        console.error ('Грешка при сваляне на файл:', err);
+        console.error("Грешка при сваляне на файл:", err);
       }
     });
   } catch (error) {
-    console.error ('Грешка при сваляне на файла:', error);
-    res.status (500).json ({message: 'Неуспешно сваляне на файла.'});
+    console.error("Грешка при сваляне на файла:", error);
+    res.status(500).json({ message: "Неуспешно сваляне на файла." });
   }
 };

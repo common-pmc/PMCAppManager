@@ -1,253 +1,396 @@
-import React from 'react';
-import {useNavigate} from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance'; 
-import usePaginatedFetch from '../hooks/usePaginatedFetch';
+import React, { useMemo, useState } from "react";
+import axiosInstance from "../api/axiosInstance";
+import usePaginatedFetch from "../hooks/usePaginatedFetch";
+
 import {
-  Container,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
+  Box,
   Button,
+  Card,
+  CardContent,
   CircularProgress,
+  Collapse,
   IconButton,
-  Typography,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
+  Typography,
   Alert,
-  InputAdornment,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import PaginationControls from '../components/PaginationControls';
+  Divider,
+} from "@mui/material";
+
+import {
+  Folder as FolderIcon,
+  FolderOpen as FolderOpenIcon,
+  Description as FileIcon,
+  Apartment as CompanyIcon,
+  BusinessCenter as DepartmentIcon,
+  Category as ProductTypeIcon,
+  Inventory2 as ProductIcon,
+  Download as DownloadIcon,
+  ExpandLess,
+  ExpandMore,
+  MoreVert as MoreVertIcon,
+  UnfoldMore as ExpandAllIcon,
+  UnfoldLess as CollapseAllIcon,
+} from "@mui/icons-material";
 
 const FileList = () => {
-  
-  const navigate = useNavigate ();
-
   const {
-    data: files,
-    meta,
+    data: files = [],
     loading,
     error,
-    params,
-    setLimit,
-    setSearch,
-    setPage,
-    fetchNow,
-  } = usePaginatedFetch('/admin/files', {page: 1, limit: 10}, [], {
-    debounceMs: 300,
+  } = usePaginatedFetch("/admin/files", {
+    page: 1,
+    limit: 10,
   });
 
-  const handlePageChange = page => {
-    setPage (page);
-    fetchNow ({page, limit: params.limit, search: params.search});
-  }
+  const [expanded, setExpanded] = useState({});
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleLimitChange = limit => {
-    setLimit (limit);
-    setPage (1);
-    fetchNow ({limit, page: 1, search: params.search});
-  }
+  const groupedFiles = useMemo(() => {
+    return files.reduce((acc, file) => {
+      const company = file.company?.companyName || "Без фирма";
 
-    const handleDownload = async (fileId, originalName) => {
+      const department = file.department?.departmentName || "Без отдел";
+
+      const product = file.productName || "Без продукт";
+
+      const productType = file.productType || "Други";
+
+      if (!acc[company]) {
+        acc[company] = {};
+      }
+
+      if (!acc[company][department]) {
+        acc[company][department] = {};
+      }
+
+      if (!acc[company][department][product]) {
+        acc[company][department][product] = {};
+      }
+
+      if (!acc[company][department][product][productType]) {
+        acc[company][department][product][productType] = [];
+      }
+
+      acc[company][department][product][productType].push(file);
+
+      return acc;
+    }, {});
+  }, [files]);
+
+  const toggleExpand = (key) => {
+    setExpanded((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const expandAll = () => {
+    const allExpanded = {};
+
+    files.forEach((file) => {
+      const company = file.company?.companyName || "Без фирма";
+
+      const department = file.department?.departmentName || "Без отдел";
+
+      const product = file.productName || "Без продукт";
+
+      const productType = file.productType || "Други";
+
+      allExpanded[company] = true;
+      allExpanded[`${company}-${department}`] = true;
+      allExpanded[`${company}-${department}-${product}`] = true;
+      allExpanded[`${company}-${department}-${product}-${productType}`] = true;
+    });
+
+    setExpanded(allExpanded);
+  };
+
+  const collapseAll = () => {
+    setExpanded({});
+  };
+
+  const handleMenuOpen = (event, file) => {
+    setMenuAnchor(event.currentTarget);
+    setSelectedFile(file);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setSelectedFile(null);
+  };
+
+  const handleDownload = async (file) => {
     try {
-      const response = await axiosInstance.get (`/admin/files/${fileId}/download`, {
-        responseType: 'blob',
-      });
-      // Create a link to download the file
-      const downloadUrl = window.URL.createObjectURL (response.data);
-      const link = document.createElement ('a');
-      link.href = downloadUrl;
-      link.setAttribute ('download', originalName || 'file');
-      document.body.appendChild (link);
-      link.click ();
-      link.parentNode.removeChild (link);
+      const response = await axiosInstance.get(
+        `/admin/files/${file.id}/download`,
+        {
+          responseType: "blob",
+        },
+      );
 
-      // Remove the object URL after download
-      window.URL.revokeObjectURL (downloadUrl);
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.setAttribute("download", file.originalname || file.filename);
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.parentNode.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error ('Грешка при изтегляне на файла:', error);
-      alert ('Неуспешно изтегляне на файла. Моля опитайте по-късно.');
+      console.error(error);
     }
   };
 
-  const handleClearSearch = () => {
-    setSearch ('');
-    setPage (1);
-    fetchNow ({search: '', page: 1, limit: params.limit, startDate: params.startDate || '', endDate: params.endDate || ''});
+  const renderFiles = (files) => {
+    return files.map((file) => (
+      <ListItemButton
+        key={file.id}
+        sx={{
+          pl: 10,
+          borderRadius: 2,
+        }}
+      >
+        <ListItemIcon>
+          <FileIcon />
+        </ListItemIcon>
+
+        <ListItemText
+          primary={file.originalname || file.filename}
+          secondary={
+            <>
+              {file.description || "Няма описание"}
+              <br />
+              Качен: {new Date(file.createdAt).toLocaleString()}
+            </>
+          }
+        />
+
+        <IconButton onClick={(e) => handleMenuOpen(e, file)}>
+          <MoreVertIcon />
+        </IconButton>
+      </ListItemButton>
+    ));
+  };
+
+  if (loading) {
+    return <CircularProgress />;
   }
 
   return (
-    <Container className="max-w-5xl mx-auto mt-8">
-      <Stack
-        direction='row'
-        justifyContent='flex-start'
-        mb={2}
-      >
-        <Button
-          variant='outlined'
-          startIcon={<ArrowBackIcon />}
-          sx={{minWidth: '100px'}}
-          onClick={() => navigate ('/admin/dashboard', {replace: true})}
-        >
-          Обратно към списъка с потребители
-        </Button>
-      </Stack>
-
-      {error && <Alert severity="error" sx={{mb: 2}}>{error}</Alert>}
-      {loading && <CircularProgress sx={{mb: 2}} />}
-
-      <Stack direction='column' alignItems='center' justifyContent='space-between' className='mb-4'>
-        <Typography
-          variant='h4'
-          sx={{mb: 4}}
-        >
-          Качени файлове
-        </Typography>
-        <TextField 
-          size='small'
-          sx={{ mb: 3, radius: 15}}
-          placeholder='Търси по име на фирма...'
-          helperText='Можете да търсите по име на фирма...'
-          variant='outlined'
-          slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <SearchIcon sx={{color: 'action.active'}} />
-                          </InputAdornment>
-                        ),
-                        endAdornment: params.search
-                          ? <InputAdornment position="end">
-                              <IconButton
-                                size="small"
-                                aria-label="Изчисти търсенето"
-                                onClick={handleClearSearch}
-                              >
-                                <ClearIcon fontSize="small" />
-                              </IconButton>
-                            </InputAdornment>
-                          : null,
-                      },
-                    }}
-          value={params.search || ''}
-          onChange={e => {
-            setSearch (e.target.value)
-            setPage (1);
-          }}
-        />
-
-        <Stack direction='row' spacing={2} justifyContent='center' sx={{mb: 3}}>
-          <TextField
-            label='От дата'
-            type='date'
-            size='small'
-            slotProps={{
-              inputLabel: { shrink: true }
-            }}
-            value={params.startDate || ''}
-            onChange={e => {
-              const v = e.target.value || '';
-              setPage(1);
-              fetchNow({ startDate: v, endDate: params.endDate || '', page: 1, limit: params.limit, search: params.search });
-            }}
-          />
-
-          <TextField
-            label='До дата'
-            type='date'
-            size='small'
-            slotProps={{
-              inputLabel: { shrink: true }
-            }}
-            value={params.endDate || ''}
-            onChange={e => {
-              const v = e.target.value || '';
-              setPage(1);
-              fetchNow({ endDate: v, startDate: params.startDate || '', page: 1, limit: params.limit, search: params.search });
-            }}
-          />
+    <Card>
+      <CardContent>
+        <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<ExpandAllIcon />}
+            onClick={expandAll}
+          >
+            Expand All
+          </Button>
 
           <Button
-            variant='outlined'
-            size='small'
-            onClick={() => {
-              setPage(1);
-              fetchNow({ startDate: '', endDate: '', page: 1, limit: params.limit, search: params.search });
-            }}
+            variant="outlined"
+            startIcon={<CollapseAllIcon />}
+            onClick={collapseAll}
           >
-            Изчисти дати
+            Collapse All
           </Button>
         </Stack>
-      </Stack>
 
-      {files.length === 0
-        ? <Typography className="text-center text-gray-600">
-            Няма качени файлове
-          </Typography>
-        : <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Име на файла</TableCell>
-                  <TableCell>Фирма</TableCell>
-                  <TableCell>Отдел</TableCell>
-                  <TableCell>Качил</TableCell>
-                  <TableCell>Последно изтеглен от</TableCell>
-                  <TableCell>Описание</TableCell>
-                  <TableCell>Дата на качване</TableCell>
-                  <TableCell>Свали файла</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {files.map (file => (
-                  <TableRow key={file.id}>
-                    <TableCell>{file.filename}</TableCell>
-                    <TableCell>{file.company?.companyName || '-'}</TableCell>
-                    <TableCell>{file.department?.departmentName || '-'}</TableCell>
-                    <TableCell>{file.uploadedBy?.email || '-' }</TableCell>
-                    <TableCell>{file.lastDownloadedBy?.email || '-' }</TableCell>
-                    <TableCell>{file.description || '-'}</TableCell>
-                    <TableCell>
-                      {file.createdAt ? new Date (file.createdAt).toLocaleDateString () : '-'}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => handleDownload (file.id, file.originalname)}
-                      >
-                        Свали
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>}
+        {error && <Alert severity="error">{error}</Alert>}
 
-          <PaginationControls 
-            meta={{
-              page: Number (params.page) || Number (meta.page) || 1,
-              pageCount: Number (meta.pageCount) || 1,
-              pageSize: Number (params.limit) || Number (meta.pageSize) || 10,
-              total: Number (meta.total) || 0,
+        <List>
+          {Object.entries(groupedFiles).map(([companyName, departments]) => {
+            const companyKey = companyName;
+
+            return (
+              <Box key={companyKey}>
+                <ListItemButton onClick={() => toggleExpand(companyKey)}>
+                  <ListItemIcon>
+                    {expanded[companyKey] ? <FolderOpenIcon /> : <FolderIcon />}
+                  </ListItemIcon>
+
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" spacing={1}>
+                        <CompanyIcon />
+                        <Typography fontWeight="bold">{companyName}</Typography>
+                      </Stack>
+                    }
+                  />
+
+                  <Typography sx={{ mr: 2 }}>
+                    (
+                    {
+                      Object.values(departments)
+                        .flatMap((p) => Object.values(p))
+                        .flatMap((p) => Object.values(p))
+                        .flat().length
+                    }
+                    )
+                  </Typography>
+
+                  {expanded[companyKey] ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+
+                <Collapse in={expanded[companyKey]}>
+                  <List component="div">
+                    {Object.entries(departments).map(
+                      ([departmentName, products]) => {
+                        const departmentKey = `${companyKey}-${departmentName}`;
+
+                        return (
+                          <Box key={departmentKey}>
+                            <ListItemButton
+                              sx={{ pl: 4 }}
+                              onClick={() => toggleExpand(departmentKey)}
+                            >
+                              <ListItemIcon>
+                                {expanded[departmentKey] ? (
+                                  <FolderOpenIcon />
+                                ) : (
+                                  <FolderIcon />
+                                )}
+                              </ListItemIcon>
+
+                              <ListItemText
+                                primary={
+                                  <Stack direction="row" spacing={1}>
+                                    <DepartmentIcon />
+                                    <Typography>{departmentName}</Typography>
+                                  </Stack>
+                                }
+                              />
+
+                              {expanded[departmentKey] ? (
+                                <ExpandLess />
+                              ) : (
+                                <ExpandMore />
+                              )}
+                            </ListItemButton>
+
+                            <Collapse in={expanded[departmentKey]}>
+                              <List component="div">
+                                {Object.entries(products).map(
+                                  ([productName, productTypes]) => {
+                                    const productKey = `${departmentKey}-${productName}`;
+
+                                    return (
+                                      <Box key={productKey}>
+                                        <ListItemButton
+                                          sx={{
+                                            pl: 7,
+                                          }}
+                                          onClick={() =>
+                                            toggleExpand(productKey)
+                                          }
+                                        >
+                                          <ListItemIcon>
+                                            <ProductIcon />
+                                          </ListItemIcon>
+
+                                          <ListItemText primary={productName} />
+
+                                          {expanded[productKey] ? (
+                                            <ExpandLess />
+                                          ) : (
+                                            <ExpandMore />
+                                          )}
+                                        </ListItemButton>
+
+                                        <Collapse in={expanded[productKey]}>
+                                          <List component="div">
+                                            {Object.entries(productTypes).map(
+                                              ([type, typeFiles]) => {
+                                                const typeKey = `${productKey}-${type}`;
+
+                                                return (
+                                                  <Box key={typeKey}>
+                                                    <ListItemButton
+                                                      sx={{
+                                                        pl: 9,
+                                                      }}
+                                                      onClick={() =>
+                                                        toggleExpand(typeKey)
+                                                      }
+                                                    >
+                                                      <ListItemIcon>
+                                                        <ProductTypeIcon />
+                                                      </ListItemIcon>
+
+                                                      <ListItemText
+                                                        primary={`${type} (${typeFiles.length})`}
+                                                      />
+
+                                                      {expanded[typeKey] ? (
+                                                        <ExpandLess />
+                                                      ) : (
+                                                        <ExpandMore />
+                                                      )}
+                                                    </ListItemButton>
+
+                                                    <Collapse
+                                                      in={expanded[typeKey]}
+                                                    >
+                                                      <List>
+                                                        {renderFiles(typeFiles)}
+                                                      </List>
+                                                    </Collapse>
+                                                  </Box>
+                                                );
+                                              },
+                                            )}
+                                          </List>
+                                        </Collapse>
+                                      </Box>
+                                    );
+                                  },
+                                )}
+                              </List>
+                            </Collapse>
+                          </Box>
+                        );
+                      },
+                    )}
+                  </List>
+                </Collapse>
+
+                <Divider sx={{ my: 1 }} />
+              </Box>
+            );
+          })}
+        </List>
+
+        <Menu
+          anchorEl={menuAnchor}
+          open={Boolean(menuAnchor)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem
+            onClick={() => {
+              handleDownload(selectedFile);
+              handleMenuClose();
             }}
-            onPageChange={p => {
-              console.log("[FileList] onPageChange:", p);
-              handlePageChange(p);
-            }}
-            onLimitChange={l => {
-              console.log("[FileList] onLimitChange:", l);
-              handleLimitChange(l);
-            }}
-          />
-    </Container>
+          >
+            <DownloadIcon sx={{ mr: 1 }} />
+            Download
+          </MenuItem>
+        </Menu>
+      </CardContent>
+    </Card>
   );
 };
 
