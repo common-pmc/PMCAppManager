@@ -5,16 +5,16 @@ const {
   Department,
   DownloadHistory,
   DownloadLog,
-} = require ('../database/models');
-const jwt = require ('jsonwebtoken');
-const path = require ('path');
-const fs = require ('fs');
-const archiver = require ('archiver');
-const {Op} = require ('sequelize');
-const mime = require ('mime-types');
-const paginate = require ('../utils/paginate');
+} = require("../database/models");
+const jwt = require("jsonwebtoken");
+const path = require("path");
+const fs = require("fs");
+const archiver = require("archiver");
+const { Op } = require("sequelize");
+const mime = require("mime-types");
+const paginate = require("../utils/paginate");
 
-const SECRET = process.env.JWT_SECRET || 'my_secret_key';
+const SECRET = process.env.JWT_SECRET || "my_secret_key";
 
 // Сваляне на файл
 exports.downloadFile = async (req, res) => {
@@ -23,14 +23,14 @@ exports.downloadFile = async (req, res) => {
     const user = req.user;
 
     if (!user.isActive) {
-      return res.status (403).json ({
-        message: 'Вашия акаунт е деактивиран. Нямате право да сваляте файлове.',
+      return res.status(403).json({
+        message: "Вашия акаунт е деактивиран. Нямате право да сваляте файлове.",
       });
     }
 
-    const file = await File.findByPk (fileId);
+    const file = await File.findByPk(fileId);
     if (!file) {
-      return res.status (404).json ({message: 'Файлът не е намерен.'});
+      return res.status(404).json({ message: "Файлът не е намерен." });
     }
 
     // проверка дали файлът принадлежи на същата фирма като потребителя
@@ -38,74 +38,82 @@ exports.downloadFile = async (req, res) => {
       file.companyId !== user.companyId ||
       (user.departmentId !== null && file.departmentId !== user.departmentId)
     ) {
-      return res.status (403).json ({message: 'Нямате достъп до този файл.'});
+      return res.status(403).json({ message: "Нямате достъп до този файл." });
     }
 
     const filePath = file.path
-      ? path.join (__dirname, '..', file.path)
-      : path.join (__dirname, '..', 'uploads', file.filename);
+      ? path.join(__dirname, "..", file.path)
+      : path.join(__dirname, "..", "uploads", file.filename);
 
-    if (!fs.existsSync (filePath)) {
+    if (!fs.existsSync(filePath)) {
       return res
-        .status (404)
-        .json ({message: 'Файлът не е намерен на сървъра.'});
+        .status(404)
+        .json({ message: "Файлът не е намерен на сървъра." });
     }
 
     // Определя MIME типа
-    const mimeType = mime.lookup (filePath) || 'application/octet-stream';
-    res.setHeader ('Content-Type', mimeType);
-    res.setHeader("Content-Disposition", `attachment; filename="${file.filename}.${file.extension}"`);
+    const mimeType = mime.lookup(filePath) || "application/octet-stream";
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${file.filename}.${file.extension}"`,
+    );
 
     // записваме в DownloadHistory и DownloadLog
-    await DownloadHistory.create ({
+    await DownloadHistory.create({
       userId: user.id,
       fileId: file.id,
-      downloadedAt: new Date (),
+      downloadedAt: new Date(),
     });
 
-    await DownloadLog.create ({
+    await DownloadLog.create({
       userId: user.id,
       fileId: file.id,
-      ipAddress: req.ip ||
-        req.headers['x-forwarded-for'] ||
+      ipAddress:
+        req.ip ||
+        req.headers["x-forwarded-for"] ||
         req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date (),
+      userAgent: req.headers["user-agent"] || "Unknown",
+      timestamp: new Date(),
     });
 
     // Обновяваме downloadedBy поле с id на потребителя
-    await file.update ({downloadedBy: user.id});
+    await file.update({ downloadedBy: user.id });
 
     res.download(filePath, file.originalname, (err) => {
       if (err) {
-        console.error('Грешка при сваляне на файл:', err);
-        res.status(500).json({ message: 'Неуспешно сваляне на файла.' });
+        console.error("Грешка при сваляне на файл:", err);
+        res.status(500).json({ message: "Неуспешно сваляне на файла." });
       }
     });
   } catch (error) {
-    console.error ('Грешка при сваляне на файл: ', error);
+    console.error("Грешка при сваляне на файл: ", error);
     res
-      .status (500)
-      .json ({message: 'Неуспешно сваляне на файла. Моля опитайте по-късно.'});
+      .status(500)
+      .json({ message: "Неуспешно сваляне на файла. Моля опитайте по-късно." });
   }
 };
 
 // Сваляне на всички няколко файла едновременно в zip архив
-exports.downloadZip = async(req, res) => {
+exports.downloadZip = async (req, res) => {
   try {
     const user = req.user;
-    const ids = Array.isArray(req.body.ids) ? req.body.ids.map(id => parseInt(id)) : [];
+    const ids = Array.isArray(req.body.ids)
+      ? req.body.ids.map((id) => parseInt(id))
+      : [];
 
     console.log("ZIP REQUEST BODY:", req.body);
 
-    if(!user.isActive) {
+    if (!user.isActive) {
       return res.status(403).json({
-        message: 'Вашия акаунт е деактивиран. Нямате право да сваляте файлове.'
+        message: "Вашия акаунт е деактивиран. Нямате право да сваляте файлове.",
       });
     }
 
-    if(!ids || ids.length === 0) {
-      return res.status(400).json({message: 'Не са избрани файлове за сваляне.'});
+    if (!ids || ids.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Не са избрани файлове за сваляне." });
     }
 
     // Взимаме само тези файлове, които потребителят има право да сваля (от същата фирма и отдел).
@@ -119,25 +127,27 @@ exports.downloadZip = async(req, res) => {
     }
 
     const files = await File.findAll({
-      where: whereClause
+      where: whereClause,
     });
 
     if (files.length === 0) {
-      return res.status(404).json({message: 'Не са намерени файлове за сваляне.'});
+      return res
+        .status(404)
+        .json({ message: "Не са намерени файлове за сваляне." });
     }
-    
+
     // ZIP Headers
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename=files.zip');
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", "attachment; filename=files.zip");
 
     // Създаваме архив
-    const archive = archiver('zip', {
-      zlib: { level: 9 } // Ниво на компресия
+    const archive = archiver("zip", {
+      zlib: { level: 9 }, // Ниво на компресия
     });
 
-    archive.on('error', err => {
-      console.error('Грешка при създаване на архива: ', err);
-      res.status(500).send({ message: 'Грешка при създаване на архива.' });
+    archive.on("error", (err) => {
+      console.error("Грешка при създаване на архива: ", err);
+      res.status(500).send({ message: "Грешка при създаване на архива." });
     });
 
     // Пайпваме архива към response-а
@@ -146,8 +156,8 @@ exports.downloadZip = async(req, res) => {
     // Добавяме файловете в архива и записваме логове/история за всеки:
     for (const file of files) {
       const filePath = file.path
-        ? path.join(__dirname, '..', file.path)
-        : path.join(__dirname, '..', 'uploads', file.filename);
+        ? path.join(__dirname, "..", file.path)
+        : path.join(__dirname, "..", "uploads", file.filename);
       if (!fs.existsSync(filePath)) {
         // Пропускаме ако няма файл на сървъра
         continue;
@@ -155,44 +165,46 @@ exports.downloadZip = async(req, res) => {
       // Добавяме файла в архива с оригиналното му име
       archive.file(filePath, { name: file.filename });
 
-    // Записваме в DownloadHistory и DownloadLog
-    await DownloadHistory.create({
-      userId: user.id,
-      fileId: file.id,
-      downloadedAt: new Date()
-    });
+      // Записваме в DownloadHistory и DownloadLog
+      await DownloadHistory.create({
+        userId: user.id,
+        fileId: file.id,
+        downloadedAt: new Date(),
+      });
 
-    await DownloadLog.create({
-      userId: user.id,
-      fileId: file.id,
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.connection?.remoteAddress,
-      userAgent: req.headers['user-agent'] || 'Unknown',
-      timestamp: new Date()
-    });
+      await DownloadLog.create({
+        userId: user.id,
+        fileId: file.id,
+        ipAddress:
+          req.ip ||
+          req.headers["x-forwarded-for"] ||
+          req.connection?.remoteAddress,
+        userAgent: req.headers["user-agent"] || "Unknown",
+        timestamp: new Date(),
+      });
 
-    // Обновяваме downloadedBy поле с id на потребителя
-    await file.update({downloadedBy: user.id});
+      // Обновяваме downloadedBy поле с id на потребителя
+      await file.update({ downloadedBy: user.id });
     }
 
     // Завършваме архива
     // когато archive завърши - response ще се затвори автоматично
     await archive.finalize();
-  
   } catch (error) {
-    console.error('Грешка при сваляне на zip архив: ', error);
+    console.error("Грешка при сваляне на zip архив: ", error);
     // Ако не е изпратен отговор, пращаме грешка
-    res.status(500).send({ message: 'Грешка при сваляне на zip архив.' }); 
+    res.status(500).send({ message: "Грешка при сваляне на zip архив." });
   }
-}
+};
 
 // потребител да вижда само файловете от неговата фирма
 exports.getFilesByCompany = async (req, res) => {
   try {
-    const user = req.user; 
+    const user = req.user;
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = (req.query.search || '').trim();
+    const search = (req.query.search || "").trim();
 
     const whereClause = {
       companyId: user.companyId,
@@ -204,65 +216,69 @@ exports.getFilesByCompany = async (req, res) => {
     }
     // Ако няма отдел, вижда всички файлове за фирмата
 
-    const {data: files, meta} = await paginate(File, {
+    const { data: files, meta } = await paginate(File, {
       page,
       limit,
-      searchField: 'filename',
+      searchField: "filename",
       searchValue: search,
       where: whereClause,
       include: [
-        {model: Company, as: 'Company', attributes: ['id', 'companyName']},
+        { model: Company, as: "Company", attributes: ["id", "companyName"] },
         {
           model: Department,
-          as: 'Department',
-          attributes: ['id', 'departmentName'],
+          as: "Department",
+          attributes: ["id", "departmentName"],
         },
-        {model: User, as: 'lastDownloader', attributes: ['id', 'email']},
+        { model: User, as: "lastDownloader", attributes: ["id", "email"] },
       ],
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
       attributes: [
-        'id', 
-        'filename', 
-        'description', 
-        'companyId', 
-        'departmentId', 
-        'createdAt', 
-        'updatedAt'
+        "id",
+        "filename",
+        "description",
+        "companyId",
+        "departmentId",
+        "createdAt",
+        "updatedAt",
+        "productName",
+        "productType",
       ],
       maxLimit: 100,
     });
 
-    const formattedFiles = await Promise.all (
-      files.map (async file => {
-        const lastDownload = await DownloadHistory.findOne ({
-          where: {fileId: file.id},
-          include: [{model: User, as: 'User', attributes: ['id', 'email']}],
-          order: [['downloadedAt', 'DESC']],
+    const formattedFiles = await Promise.all(
+      files.map(async (file) => {
+        const lastDownload = await DownloadHistory.findOne({
+          where: { fileId: file.id },
+          include: [{ model: User, as: "User", attributes: ["id", "email"] }],
+          order: [["downloadedAt", "DESC"]],
         });
 
         return {
           id: file.id,
           filename: file.filename,
           originalname: file.originalname || file.filename,
-          url: `${req.protocol}://${req.get ('host')}/files/download/${file.id}`,
+          url: `${req.protocol}://${req.get("host")}/files/download/${file.id}`,
           description: file.description,
+          productName: file.productName,
+          productType: file.productType,
           company: file.Company
-            ? {id: file.Company.id, name: file.Company.companyName}
+            ? { id: file.Company.id, name: file.Company.companyName }
             : null,
           department: file.Department
-            ? {id: file.Department.id, name: file.Department.departmentName}
+            ? { id: file.Department.id, name: file.Department.departmentName }
             : null,
           lastDownloadedBy: lastDownload ? lastDownload.User.email : null,
           lastDownloadedAt: lastDownload ? lastDownload.downloadedAt : null,
         };
-      })
+      }),
     );
 
-    res.json ({ data: formattedFiles, meta });
+    res.json({ data: formattedFiles, meta });
   } catch (error) {
-    console.error ('Грешка при зареждане на файловете: ', error);
-    res.status (500).json ({
-      message: 'Неуспешно зареждане на файловете. Моля опитайте по-късно.',
+    console.error("Грешка при зареждане на файловете: ", error);
+    res.status(500).json({
+      message: "Неуспешно зареждане на файловете. Моля опитайте по-късно.",
     });
   }
 };
