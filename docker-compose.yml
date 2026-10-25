@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  app-manager-service:
+    build: .
+    container_name: app-manager
+    restart: always
+    volumes:
+      # Защитава SQLite файла от изтриване
+      - ./docker_database:/app/database
+      # Защитава качените файлове
+      - ./docker_uploads:/app/uploads
+    networks:
+      - web-network
+
+networks:
+  web-network:
+    external: true
