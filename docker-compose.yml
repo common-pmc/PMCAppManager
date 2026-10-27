@@ -2,9 +2,14 @@ version: '3.8'
 
 services:
   app-manager-service:
-    build: .
+    build: 
+      context: .
+      args:
+        - API_BASE_URL=http://200.234.230.195
     container_name: app-manager
     restart: always
+    environment:
+      - API_BASE_URL=http://200.234.230.195
     volumes:
       # Защитава SQLite файла от изтриване
       - ./docker_database:/app/database

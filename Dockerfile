@@ -14,7 +14,8 @@ RUN cd client && npm install
 # скриптът ви да я запише във фронтенда преди npm run build
 # (След време в Clouding.io тук ще напишете вашия истински домейн)
 # ========================================================
-ENV API_BASE_URL=http://localhost:5000
+ARG API_BASE_URL
+ENV API_BASE_URL=$API_BASE_URL
 ENV NODE_ENV=production
 
 # 3. Копираме целия код (за да може скриптът да види файловете)
