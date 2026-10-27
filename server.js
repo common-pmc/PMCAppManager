@@ -19,12 +19,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Генерира автоматично .env файл във фронтенда
-const frontendEnvPath = path.join(__dirname, "./client/.env");
-fs.writeFileSync(
-  frontendEnvPath,
-  `VITE_API_BASE_URL=${process.env.API_BASE_URL}\n`,
-);
-console.log(`✅ Frontend env file generated at ${frontendEnvPath}`);
+// const frontendEnvPath = path.join(__dirname, "./client/.env");
+// fs.writeFileSync(
+//   frontendEnvPath,
+//   `VITE_API_BASE_URL=${process.env.API_BASE_URL}\n`,
+// );
+// console.log(`✅ Frontend env file generated at ${frontendEnvPath}`);
 
 app.use(
   cors({
@@ -50,7 +50,7 @@ if (process.env.NODE_ENV === "production") {
   const buildPath = path.join(__dirname, "client", "dist");
   app.use(express.static(buildPath));
 
-  app.get("*", (req, res) => {
+  app.get("/*any", (req, res) => {
     res.sendFile(path.join(buildPath, "index.html"));
   });
 } else {
