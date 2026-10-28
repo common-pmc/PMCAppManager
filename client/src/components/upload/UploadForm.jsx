@@ -117,7 +117,7 @@ const UploadForm = () => {
           variant="outlined"
           startIcon={<ArrowBackIcon />}
           sx={{ minWidth: "100px" }}
-          onClick={() => navigate("/admin/files")}
+          onClick={() => navigate("/admin/dashboard")}
         >
           Обратно към списъка с потребители
         </Button>
